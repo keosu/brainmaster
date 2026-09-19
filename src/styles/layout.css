@@ -203,8 +203,21 @@
 .trainbar__chip.is-now { color: #06121f; background: var(--grad-hero); border-color: transparent; font-weight: 700; }
 
 @media (max-width: 640px) {
-  .hero { padding: 22px 18px; border-radius: var(--r-lg); }
-  .grid-games { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
+  .hero { padding: 18px 16px; border-radius: var(--r-lg); }
+  .grid-games { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
   .topbar { padding: calc(10px + var(--safe-t)) 12px 10px; }
   .stage { padding: 12px 10px calc(24px + var(--safe-b)); }
+
+  /* 手机上让游戏列表一眼可见：收起顶部称号/等级等占屏信息，隐藏卡片描述 */
+  .hero__stats { display: none; }
+  .levelbar { display: none; }
+  .hero > p { display: none; }
+  .topbar__title--brand { display: none; }   /* 首页只留 🧠 logo，少占地方 */
+  .topbar__back-label { display: none; }       /* 返回键只留 🏠 图标 */
+  .gcard__desc { display: none; }
+  .gcard__cat { display: none; }
+  .gcard { padding: 14px; gap: 8px; }
+  .gcard__icon { width: 42px; height: 42px; font-size: 22px; }
+  .gcard__name { font-size: 15px; }
+  .gcard__foot { font-size: 11px; }
 }

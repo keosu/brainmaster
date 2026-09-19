@@ -11,6 +11,7 @@ const DEFAULT = {
     voice: true,      // 语音朗读（TTS）
     hints: true,      // 是否显示提示（如黑白棋可落点）
     theme: 'heroes',  // 当前主题包 id
+    hidden: [],       // 被用户隐藏的游戏 id 列表
   },
   brain: {
     power: 0,     // 脑力值
@@ -122,6 +123,24 @@ export const save = {
   reset() {
     cache = structuredClone(DEFAULT);
     write();
+  },
+
+  /** 导出全部存档为 JSON 字符串 */
+  exportString() {
+    return JSON.stringify(read(), null, 2);
+  },
+
+  /** 导入存档（用导出的 JSON 覆盖）。结构非法会抛错。 */
+  importData(obj) {
+    if (!obj || typeof obj !== 'object') throw new Error('数据格式无效');
+    cache = deepMerge(structuredClone(DEFAULT), obj);
+    write();
+    return cache;
+  },
+
+  isHidden(id) {
+    const h = read().settings.hidden;
+    return Array.isArray(h) && h.includes(id);
   },
 };
 

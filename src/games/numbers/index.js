@@ -39,6 +39,7 @@ export default class NumbersGame extends Game {
     this.expected = 1;
     const n = this.startN + this.round - 1;
     this.n = n;
+    const extra = Math.min(1200, n * 180); // 数字越多，给的记忆时间越长
 
     // 布点：尽量排成接近正方形的格子，避免只有一行、显得空荡
     const total = (() => {
@@ -62,7 +63,7 @@ export default class NumbersGame extends Game {
 
     this.phase = 'memorize';
     this.cells.forEach((c) => { if (c.dataset.num) { c.textContent = c.dataset.num; c.classList.add('is-show'); } });
-    this.tip.textContent = `记住这 ${n} 个数字的位置…`;
+    this.tip.textContent = `记住这 ${n} 个数字的位置（${Math.round((this.showMs + extra) / 1000 * 10) / 10} 秒）…`;
     this.say(`记住 ${n} 个数字`);
     this.hud.patch('round', this.round);
     this.hud.patch('next', 1);
@@ -73,7 +74,7 @@ export default class NumbersGame extends Game {
       this.phase = 'input';
       this.cells.forEach((c) => { c.textContent = ''; c.classList.remove('is-show'); });
       this.tip.textContent = '现在按 1、2、3… 的顺序点出来！';
-    }, this.showMs + Math.min(600, n * 60));
+    }, this.showMs + extra);
   }
 
   tap(cell) {

@@ -6,8 +6,9 @@ import * as router from '../core/router.js';
 import { renderHome, pickTrainingSet } from './home.js';
 import { Runner } from './runner.js';
 import { getGameMeta } from '../games/manifest.js';
-import { showModal, clearOverlays } from './modal.js';
+import { showModal, clearOverlays, toast } from './modal.js';
 import { levelOf } from '../core/storage.js';
+import { openSettings } from './settings.js';
 
 export function boot(app) {
   clear(app);
@@ -15,7 +16,11 @@ export function boot(app) {
   /* ---------- 顶栏 ---------- */
   const back = el('button.topbar__back', {
     onClick: () => router.home(),
-  }, [el('span', { text: '←' }), el('span', { text: '首页' })]);
+    'aria-label': '返回首页',
+  }, [
+    el('span.topbar__back-ico', { text: '🏠' }),
+    el('span.topbar__back-label', { text: '首页' }),
+  ]);
 
   const titleBox = el('div', {}, [
     el('div.topbar__title', { text: 'Brain Master' }),
@@ -27,7 +32,7 @@ export function boot(app) {
       text: '🧠',
       style: { width: '36px', height: '36px', borderRadius: '12px', display: 'grid', placeItems: 'center', background: 'var(--grad-hero)', fontSize: '19px' },
     }),
-    el('div.topbar__title', { text: 'Brain Master' }),
+    el('div.topbar__title.topbar__title--brand', { text: 'Brain Master' }),
   ]);
 
   const btnSound = iconBtn('🔊', () => {
@@ -42,13 +47,16 @@ export function boot(app) {
     const v = save.toggleSetting('voice');
     voice.setEnabled(v);
     btnVoice.classList.toggle('is-off', !v);
-    if (v) voice.speak('语音已开启');
+    if (v) { voice.speak('语音已开启'); toast('🔊 语音已开启'); }
+    else toast('🔇 语音已关闭');
   }, !save.settings.voice);
+
+  const btnSettings = iconBtn('⚙️', () => openSettings(), false);
 
   const topbar = el('header.topbar', {}, [
     back, brand, titleBox,
     el('div.topbar__spacer'),
-    el('div.topbar__actions', {}, [btnSound, btnVoice]),
+    el('div.topbar__actions', {}, [btnSettings, btnSound, btnVoice]),
   ]);
 
   const content = el('div.shell__content');
@@ -59,6 +67,7 @@ export function boot(app) {
   const runner = new Runner({ hudArea: null, gameArea: null });
   let host = null;
   let trainState = null;
+  let onHome = true;
 
   function setTopbar(mode, opts = {}) {
     back.classList.toggle('u-hide', mode === 'home');
@@ -76,6 +85,7 @@ export function boot(app) {
     clearOverlays();
     clear(content);
     setTopbar('home');
+    onHome = true;
     renderHome(content);
     window.scrollTo({ top: 0 });
   }
@@ -98,6 +108,7 @@ export function boot(app) {
     if (!meta) { showHome(); return; }
     const h = ensureStage();
     clear(h.trainArea);
+    onHome = false;
     setTopbar('game', { title: `${meta.emoji} ${meta.name}`, sub: meta.category });
     runner.load(id, query);
   }
@@ -180,6 +191,11 @@ export function boot(app) {
   // Esc 返回首页（游戏中）
   window.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && runner.current) router.home();
+  });
+
+  // 设置里隐藏/导入游戏后，若停留在首页则原地刷新
+  window.addEventListener('bm:settings-changed', () => {
+    if (onHome) { clear(content); renderHome(content); }
   });
 
   // 首次交互解锁音频

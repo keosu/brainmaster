@@ -33,3 +33,14 @@
   background: rgba(6, 10, 24, .78);
   color: #fff;
 }
+
+/* 数字华容道：数字居中放大，盖住整块 */
+.pz-board.is-num .pz-num {
+  left: 0; top: 0; right: 0; bottom: 0;
+  width: 100%; height: 100%;
+  display: grid; place-items: center;
+  font-size: clamp(20px, 7vw, 46px);
+  font-family: var(--font-num);
+  background: transparent; padding: 0;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, .45);
+}

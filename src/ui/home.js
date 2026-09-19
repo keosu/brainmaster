@@ -68,15 +68,19 @@ export function renderHome(content) {
   const grid = el('div.grid-games');
   function renderGrid() {
     clear(grid);
-    const list = filterCat === '全部' ? GAMES : GAMES.filter((g) => g.category === filterCat);
+    const hidden = new Set(save.settings.hidden || []);
+    const pool = GAMES.filter((g) => !hidden.has(g.id));
+    const list = filterCat === '全部' ? pool : pool.filter((g) => g.category === filterCat);
     list.forEach((g) => grid.appendChild(gameCard(g)));
   }
   renderGrid();
 
+  const hidden = save.settings.hidden || [];
+  const visibleCount = GAMES.filter((g) => !hidden.includes(g.id)).length;
   const gamesSection = el('section', {}, [
     el('div.section__head', {}, [
       el('h2.section__title', { text: '🎮 游戏大厅' }),
-      el('span.section__hint', { text: `${GAMES.length} 个项目 · 点开即玩${themedGames().length ? ' · 换皮主题在支持的游戏里选' : ''}` }),
+      el('span.section__hint', { text: `${visibleCount} 个项目 · 点开即玩${themedGames().length ? ' · 换皮主题在支持的游戏里选' : ''}` }),
     ]),
     catRow,
     el('div', { style: { height: '12px' } }),
@@ -128,12 +132,14 @@ function gameCard(g) {
   return card;
 }
 
-/** 每日训练抽 3 个（优先没玩过的） */
+/** 每日训练抽 3 个（优先没玩过的；排除被隐藏的游戏） */
 export function pickTrainingSet(n = 3) {
-  const quick = quickGames();
+  const hidden = new Set(save.settings.hidden || []);
+  const quick = quickGames().filter((g) => !hidden.has(g.id));
+  const pool = quick.length ? quick : quickGames(); // 全隐藏时退回全部，保证可用
   const done = save.trainedToday;
-  const fresh = shuffle(quick.filter((g) => !done.includes(g.id)));
-  const rest = shuffle(quick.filter((g) => done.includes(g.id)));
+  const fresh = shuffle(pool.filter((g) => !done.includes(g.id)));
+  const rest = shuffle(pool.filter((g) => done.includes(g.id)));
   return [...fresh, ...rest].slice(0, n);
 }
 

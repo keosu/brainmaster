@@ -19,7 +19,8 @@ export default class PuzzleGame extends Game {
     this.moves = 0;
     this.startedAt = 0;
     this.selected = null;
-    this.showNumbers = false;
+    this.forceNum = !!this.options.num;          // 数字华容道：始终显示数字、不显示图片
+    this.showNumbers = this.forceNum;
     this.done = false;
 
     /* 控件 */
@@ -28,13 +29,17 @@ export default class PuzzleGame extends Game {
       save.setSetting('theme', id);
       this.ctx.reload({ theme: id });
     });
-    const peek = el('button.btn.btn--sm.btn--ghost', { text: '👁 看原图', onClick: () => this.peek() });
-    const nums = el('button.btn.btn--sm.btn--ghost', { text: '# 编号', onClick: () => { this.showNumbers = !this.showNumbers; this.render(); } });
+    const peek = el('button.btn.btn--sm.btn--ghost', { text: this.forceNum ? '🎯 看目标' : '👁 看原图', onClick: () => this.peek() });
+    const nums = this.forceNum ? null : el('button.btn.btn--sm.btn--ghost', { text: '# 编号', onClick: () => { this.showNumbers = !this.showNumbers; this.render(); } });
     const restart = el('button.btn.btn--sm.btn--ghost', { text: '🔄 重新打乱', onClick: () => this.ctx.restart() });
-    this.root.appendChild(controlRow([lv, th, peek, nums, restart]));
+    const controls = [lv, th, peek];
+    if (nums) controls.push(nums);
+    controls.push(restart);
+    this.root.appendChild(controlRow(controls));
 
     /* 棋盘 */
     this.board = el('div.pz-board.fit-box', { style: { '--n': String(this.n) } });
+    if (this.forceNum) this.board.classList.add('is-num');
     this.root.appendChild(this.board);
 
     this.build();
@@ -115,6 +120,7 @@ export default class PuzzleGame extends Game {
 
   render() {
     const n = this.n;
+    const showNum = this.showNumbers || this.forceNum;
     this.tiles.forEach((t, i) => {
       const node = this.nodes[i];
       const sizePct = 100 / n;
@@ -123,18 +129,28 @@ export default class PuzzleGame extends Game {
       node.style.left = `${t.c * sizePct}%`;
       node.style.top = `${t.r * sizePct}%`;
       const img = this.imgIndexOf(t);
-      const ir = Math.floor(img / n);
-      const ic = img % n;
-      const px = n > 1 ? (ic / (n - 1)) * 100 : 0;
-      const py = n > 1 ? (ir / (n - 1)) * 100 : 0;
-      node.style.backgroundSize = `${n * 100}% ${n * 100}%`;
-      node.style.backgroundPosition = `${px}% ${py}%`;
+      if (this.forceNum) {
+        // 数字华容道：纯色块 + 数字，不用图片
+        node.style.backgroundImage = 'none';
+        node.style.background = node.classList.contains('is-ok')
+          ? 'linear-gradient(135deg,#4ade80,#6ee7ff)'
+          : 'linear-gradient(135deg,#5b8cff,#b46bff)';
+      } else {
+        const ir = Math.floor(img / n);
+        const ic = img % n;
+        const px = n > 1 ? (ic / (n - 1)) * 100 : 0;
+        const py = n > 1 ? (ir / (n - 1)) * 100 : 0;
+        node.style.backgroundImage = `url("${this.art}")`;
+        node.style.background = '';
+        node.style.backgroundSize = `${n * 100}% ${n * 100}%`;
+        node.style.backgroundPosition = `${px}% ${py}%`;
+      }
       node.classList.toggle('is-hidden', !!t.hidden);
       node.classList.toggle('is-ok', t.id === t.r * n + t.c);
       node.classList.toggle('is-sel', this.selected === t);
       const num = node.querySelector('.pz-num');
-      num.textContent = this.showNumbers ? String(img + 1) : '';
-      num.classList.toggle('u-hide', !this.showNumbers);
+      num.textContent = showNum ? String(img + 1) : '';
+      num.classList.toggle('u-hide', !showNum);
     });
     const okCount = this.tiles.filter((t) => t.id === t.r * this.n + t.c).length;
     const target = this.mode === 'slide' ? this.n * this.n - 1 : this.n * this.n;
@@ -186,6 +202,30 @@ export default class PuzzleGame extends Game {
   }
 
   peek() {
+    if (this.forceNum) {
+      const n = this.n;
+      const grid = el('div', {
+        style: { display: 'grid', gridTemplateColumns: `repeat(${n}, 1fr)`, gap: '6px', width: 'min(72vw,300px)' },
+      });
+      for (let v = 1; v <= n * n; v++) {
+        const isBlank = v === n * n;
+        grid.appendChild(el('div', {
+          text: isBlank ? '' : String(v),
+          style: {
+            aspectRatio: '1', display: 'grid', placeItems: 'center', borderRadius: '10px',
+            fontSize: '20px', fontWeight: '800', color: '#fff',
+            background: isBlank ? 'rgba(255,255,255,.06)' : 'linear-gradient(135deg,#5b8cff,#b46bff)',
+          },
+        }));
+      }
+      showModal({
+        title: '目标顺序',
+        sub: `把数字按 1 → ${n * n - 1} 排好，右下角留空即可`,
+        body: grid,
+        actions: [{ label: '继续拼', primary: true, onClick: () => closeModal() }],
+      });
+      return;
+    }
     const img = el('img', { src: this.art, style: { width: 'min(74vw,340px)', borderRadius: '18px', boxShadow: '0 20px 50px rgba(0,0,0,.5)' } });
     showModal({
       title: '目标图案',

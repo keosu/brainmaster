@@ -139,28 +139,31 @@ class Voice {
   async speak(text, { interrupt = true } = {}) {
     if (!this.enabled || !text) return;
     const str = String(text);
+    const base = { rate: this.rate, pitch: this.pitch, volume: 1.0, queueStrategy: 0 };
 
     // 1) 原生平台：优先用系统 TTS 引擎（离线、稳定、不受 WebView 限制）
     if (isNative()) {
       const tts = await this._ensureTTS();
       if (tts) {
         try {
-          await tts.speak({
-            text: str,
-            lang: this.lang,
-            rate: this.rate,
-            pitch: this.pitch,
-            volume: 1.0,
-            category: 'playback', // iOS：静音键/后台仍可播
-          });
+          // 带上语言标签先试（中文内容需要 zh-CN 语音包）
+          await tts.speak({ ...base, text: str, lang: this.lang });
           return;
         } catch (e) {
-          console.warn('[voice] 原生 TTS 播音失败，回退 Web Speech', e);
+          console.warn('[voice] 原生 TTS(带语言)失败，尝试系统默认语言', e);
+          try {
+            // 部分设备没装对应语音包，去掉 lang 用系统默认语言再试一次
+            await tts.speak({ ...base, text: str });
+            return;
+          } catch (e2) {
+            console.warn('[voice] 原生 TTS 仍然失败', e2);
+          }
         }
+        return; // 原生环境没有 Web Speech，失败就安静退出
       }
     }
 
-    // 2) Web 回退：Web Speech API
+    // 2) Web 回退：Web Speech API（浏览器开发 / 桌面端）
     const synth = window.speechSynthesis;
     if (!synth) return;
     if (interrupt) synth.cancel();

@@ -22,10 +22,11 @@ export function levelBar(meta, currentId, onChange) {
   return segment({ items: meta.levels, value: currentId, onChange });
 }
 
-/** 主题选择条 */
+/** 主题选择条：桌面用胶囊，手机宽度不够时自动切换成下拉框 */
 export function themeBar(currentId, onChange, { label = '🎨 主题' } = {}) {
+  const list = listThemes();
   const node = el('div.themes');
-  listThemes().forEach((t) => {
+  list.forEach((t) => {
     const chip = el('button.chip.chip--theme', {
       onClick: () => { onChange?.(t.id); },
     }, [
@@ -36,13 +37,27 @@ export function themeBar(currentId, onChange, { label = '🎨 主题' } = {}) {
     chip.dataset.theme = t.id;
     node.appendChild(chip);
   });
-  // 默认带一个标签，让它在游戏内也能一眼看出是"换皮肤"
+
+  // 移动端下拉（窄屏才显示，桌面隐藏）
+  const select = el('select.theme-select', {
+    'aria-label': '选择主题',
+    onChange: (e) => onChange?.(e.target.value),
+  }, list.map((t) => el('option', {
+    value: t.id,
+    text: `${t.emoji} ${t.name}`,
+    selected: t.id === currentId,
+  })));
+
   const wrap = el('div.ctrl-group.ctrl-group--theme', {}, [
     el('span.ctrl-group__k', { text: label }),
-    node,
+    node,   // 桌面胶囊
+    select, // 手机下拉
   ]);
   return Object.assign(wrap, {
-    set(id) { Array.from(node.children).forEach((c) => c.classList.toggle('is-on', c.dataset.theme === id)); },
+    set(id) {
+      Array.from(node.children).forEach((c) => c.classList.toggle('is-on', c.dataset.theme === id));
+      try { select.value = id; } catch { /* ignore */ }
+    },
   });
 }
 
