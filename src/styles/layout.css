@@ -195,7 +195,17 @@
   .home { padding: 10px 10px 40px; gap: 10px; }
   .hero { padding: 7px 10px 9px; border-radius: var(--r-lg); }
   .grid-games { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
-  .topbar { padding: calc(10px + var(--safe-t)) 12px 10px; gap: 8px; }
+  .topbar { padding: calc(8px + var(--safe-t)) 10px 8px; gap: 6px; }
+  /* 右侧图标按钮：去掉圆角底色与边框，缩小一档，保证三个都完整显示 */
+  .topbar__actions { gap: 2px; }
+  .icon-btn {
+    width: 34px; height: 34px;
+    background: transparent;
+    border-color: transparent;
+    box-shadow: none;
+    font-size: 17px;
+  }
+  .icon-btn:active { background: rgba(255, 255, 255, .08); }
   .stage { padding: 12px 10px calc(24px + var(--safe-b)); }
 
   /* 手机顶栏：首页只留 🧠 logo（名称与 slogan 收起）；Hero 数据 chip 紧凑化 */

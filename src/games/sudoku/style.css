@@ -16,19 +16,22 @@
   background: rgba(255, 255, 255, .05);
   border: 1px solid rgba(255, 255, 255, .08);
   font-size: clamp(18px, 5vw, 28px);
-  font-weight: 800;
+  font-weight: 700;
   font-family: var(--font-num);
+  /* 玩家后填的数字：柔和青蓝，与题目自带的白色数字区分但不扎眼 */
+  color: #8fd4ff;
   display: grid;
   place-items: center;
   transition: background .15s, box-shadow .15s, color .15s;
 }
 .sd-cell:hover { background: rgba(255, 255, 255, .12); }
-.sd-cell.is-given { color: var(--ink); background: rgba(255, 255, 255, .1); }
+.sd-cell.is-given { color: var(--ink); font-weight: 900; background: rgba(255, 255, 255, .1); }
 .sd-cell.is-sel { box-shadow: 0 0 0 2px var(--c-cyan) inset; background: rgba(110, 231, 255, .18); }
 .sd-cell.is-same { background: rgba(110, 231, 255, .12); }
 .sd-cell.is-bad { color: var(--c-red); box-shadow: 0 0 0 2px rgba(255, 93, 93, .7) inset; }
-.sd-cell.br { margin-right: 4px; }
-.sd-cell.bb { margin-bottom: 4px; }
+/* 宫与宫之间：淡青色虚线分界 */
+.sd-cell.br { border-right: 2px dashed rgba(110, 231, 255, .42); }
+.sd-cell.bb { border-bottom: 2px dashed rgba(110, 231, 255, .42); }
 
 .sd-pad {
   display: flex;

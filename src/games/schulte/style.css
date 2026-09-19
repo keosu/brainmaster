@@ -18,11 +18,12 @@
   place-items: center;
   border-radius: 12px;
   font-family: var(--font-num);
-  font-size: clamp(18px, 5.4vw, 30px);
-  font-weight: 800;
-  color: var(--ink);
-  background: linear-gradient(160deg, rgba(54, 72, 134, .55), rgba(18, 25, 54, .55));
-  border: 1px solid rgba(154, 192, 255, .2);
+  font-size: clamp(24px, 7.4vw, 40px);
+  font-weight: 900;
+  color: #f4f8ff;
+  text-shadow: 0 2px 9px rgba(110, 231, 255, .25);
+  background: linear-gradient(160deg, rgba(64, 86, 156, .62), rgba(22, 30, 62, .62));
+  border: 1px solid rgba(154, 192, 255, .26);
   transition: transform .12s, background .16s, color .16s, box-shadow .16s;
 }
 .sc-cell:hover {

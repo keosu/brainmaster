@@ -8,13 +8,11 @@ import { levelBar, themeBar, controlRow } from '../../ui/widgets.js';
 import { faceUrl } from '../../themes/index.js';
 import { save } from '../../core/storage.js';
 
-/* 异类的"变身"方式：差异要一眼能看出来，同时难度递增 */
+/* 异类的"变身"方式：差异要一眼能看出来 */
 const DIFFS = {
-  // 入门：歪着站
-  easy: () => [{ transform: `rotate(${randInt(20, 30)}deg)` }],
   // 标准：明显小一圈
   normal: () => [{ transform: `scale(${randInt(66, 74) / 100})` }],
-  // 困难：镜像 / 黑白 / 反色 / 变色，随机抽一种
+  // 困难（默认）：镜像 / 黑白 / 反色 / 变色，随机抽一种
   hard: () => [pick([
     { transform: 'scaleX(-1)' },
     { filter: 'grayscale(1)' },

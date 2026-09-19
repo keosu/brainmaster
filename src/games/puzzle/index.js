@@ -14,12 +14,12 @@ export default class PuzzleGame extends Game {
   async mount() {
     const theme = this.theme;
     this.n = Number(this.options.n || 3);
-    this.mode = this.options.mode || 'slide';
+    this.mode = this.options.mode || 'swap';
     this.art = artUrl(theme);
     this.moves = 0;
     this.startedAt = 0;
     this.selected = null;
-    this.forceNum = !!this.options.num;          // 数字华容道：始终显示数字、不显示图片
+    this.forceNum = !!this.options.num;          // 数字模式：始终显示数字、不显示图片（游戏内可切换）
     this.showNumbers = this.forceNum;
     this.done = false;
 
@@ -29,10 +29,22 @@ export default class PuzzleGame extends Game {
       save.setSetting('theme', id);
       this.ctx.reload({ theme: id });
     });
-    const peek = el('button.btn.btn--sm.btn--ghost', { text: this.forceNum ? '🎯 看目标' : '👁 看原图', onClick: () => this.peek() });
-    const nums = this.forceNum ? null : el('button.btn.btn--sm.btn--ghost', { text: '# 编号', onClick: () => { this.showNumbers = !this.showNumbers; this.render(); } });
-    const restart = el('button.btn.btn--sm.btn--ghost', { text: '🔄 重新打乱', onClick: () => this.ctx.restart() });
-    const controls = [lv, th, peek];
+    // 图片 / 数字模式切换
+    const modeBtn = el('button.btn.btn--sm.btn--ghost', {
+      title: this.forceNum ? '切回图片拼图' : '切换成纯数字拼图',
+      onClick: () => this.ctx.reload({ num: !this.forceNum }),
+    }, [
+      el('span.ctl-ico', { text: this.forceNum ? '🖼' : '🔢' }),
+      el('span.ctl-label', { text: this.forceNum ? '图片模式' : '数字模式' }),
+    ]);
+    const iconBtn = (ico, label, onClick, title) => el('button.btn.btn--sm.btn--ghost', { onClick, title: label }, [
+      el('span.ctl-ico', { text: ico }),
+      el('span.ctl-label', { text: label }),
+    ]);
+    const peek = iconBtn(this.forceNum ? '🎯' : '👁', this.forceNum ? '看目标' : '看原图', () => this.peek());
+    const nums = this.forceNum ? null : iconBtn('#', '编号', () => { this.showNumbers = !this.showNumbers; this.render(); });
+    const restart = iconBtn('🔄', '重新打乱', () => this.ctx.restart());
+    const controls = [lv, th, modeBtn, peek];
     if (nums) controls.push(nums);
     controls.push(restart);
     this.root.appendChild(controlRow(controls));
@@ -206,19 +218,18 @@ export default class PuzzleGame extends Game {
         style: { display: 'grid', gridTemplateColumns: `repeat(${n}, 1fr)`, gap: '6px', width: 'min(72vw,300px)' },
       });
       for (let v = 1; v <= n * n; v++) {
-        const isBlank = v === n * n;
         grid.appendChild(el('div', {
-          text: isBlank ? '' : String(v),
+          text: String(v),
           style: {
             aspectRatio: '1', display: 'grid', placeItems: 'center', borderRadius: '10px',
             fontSize: '20px', fontWeight: '800', color: '#fff',
-            background: isBlank ? 'rgba(255,255,255,.06)' : 'linear-gradient(135deg,#5b8cff,#b46bff)',
+            background: 'linear-gradient(135deg,#5b8cff,#b46bff)',
           },
         }));
       }
       showModal({
         title: '目标顺序',
-        sub: `把数字按 1 → ${n * n - 1} 排好，右下角留空即可`,
+        sub: `把数字按 1 → ${n * n} 从左到右、从上到下排好即可`,
         body: grid,
         actions: [{ label: '继续拼', primary: true, onClick: () => closeModal() }],
       });

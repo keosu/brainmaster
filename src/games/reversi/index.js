@@ -1,9 +1,9 @@
 /**
- * 黑白棋 —— 玩家执黑先手，电脑执白（难度 = 搜索深度）
+ * 黑白棋 —— 可选择先后手，电脑难度 = 搜索深度
  */
 import { Game } from '../../core/Game.js';
 import { el, sleep } from '../../core/utils.js';
-import { levelBar, controlRow } from '../../ui/widgets.js';
+import { levelBar, controlRow, segment } from '../../ui/widgets.js';
 import { toast } from '../../ui/modal.js';
 import { save } from '../../core/storage.js';
 import {
@@ -11,19 +11,29 @@ import {
 } from './engine.js';
 import { chooseMove } from './ai.js';
 
-const HUMAN = BLACK;
-const AI = WHITE;
+const COLOR_NAME = { [BLACK]: '黑', [WHITE]: '白' };
 
 export default class ReversiGame extends Game {
   async mount() {
     this.board = createBoard();
-    this.turn = HUMAN;
+    // 先后手：黑棋永远先手；玩家默认执黑，选“后手”则执白由电脑开局
+    this.human = this.options.order === 'second' ? WHITE : BLACK;
+    this.ai = this.human === BLACK ? WHITE : BLACK;
+    this.turn = BLACK;
     this.depth = Number(this.options.depth || 2);
     this.busy = false;
     this.over = false;
     this.lastMove = null;
 
     const lv = levelBar(this.meta, this.options.level, (id) => this.ctx.reload({ level: id }));
+    const orderSeg = segment({
+      items: [
+        { id: 'first', name: '我先手 · 黑' },
+        { id: 'second', name: '我后手 · 白' },
+      ],
+      value: this.human === BLACK ? 'first' : 'second',
+      onChange: (id) => this.ctx.reload({ order: id }),
+    });
     const hintBtn = el('button.btn.btn--sm.btn--ghost', {
       text: save.settings.hints ? '💡 提示开' : '💡 提示关',
       onClick: () => {
@@ -33,17 +43,11 @@ export default class ReversiGame extends Game {
       },
     });
     const restartBtn = el('button.btn.btn--sm.btn--ghost', { text: '🔄 重开', onClick: () => this.ctx.restart() });
-    this.root.appendChild(controlRow([lv, hintBtn, restartBtn]));
+    this.root.appendChild(controlRow([lv, orderSeg, hintBtn, restartBtn]));
 
     /* ---------- 棋盘 ---------- */
     const wrap = el('div.rev-wrap');
     this.grid = el('div.rev-board.fit-box');
-    // 四个星位（8×8 棋盘的 2/8、6/8 交叉点）
-    [[2, 2], [2, 6], [6, 2], [6, 6]].forEach(([r, c]) => {
-      this.grid.appendChild(el('span.rev-star', {
-        style: { left: `${(c / SIZE) * 100}%`, top: `${(r / SIZE) * 100}%` },
-      }));
-    });
     this.cells = [];
     for (let r = 0; r < SIZE; r++) {
       for (let c = 0; c < SIZE; c++) {
@@ -55,6 +59,10 @@ export default class ReversiGame extends Game {
         this.cells.push(cell);
       }
     }
+    // 四个星位：锚在格线交叉点 (2,2)(2,6)(6,2)(6,6) 上——即对应格子左上角的缝隙处（CSS 内做半个 gap 偏移）
+    [[2, 2], [2, 6], [6, 2], [6, 6]].forEach(([r, c]) => {
+      this.cells[r * SIZE + c].appendChild(el('span.rev-star'));
+    });
     wrap.appendChild(this.grid);
 
     /* 底部状态条：当前回合 + 可落点 */
@@ -64,13 +72,21 @@ export default class ReversiGame extends Game {
     this.root.appendChild(wrap);
 
     this.hud.set([
-      { key: 'me', label: '你（黑）', value: '2' },
-      { key: 'ai', label: '电脑（白）', value: '2' },
+      { key: 'me', label: `你（${COLOR_NAME[this.human]}）`, value: '2' },
+      { key: 'ai', label: `电脑（${COLOR_NAME[this.ai]}）`, value: '2' },
       { key: 'state', label: '状态', value: '轮到你' },
     ]);
     this.hud.show();
     this.render();
-    this.say('黑白棋开始，你先下');
+
+    if (this.turn === this.ai) {
+      // 玩家选后手：电脑执黑先行
+      this.busy = true;
+      this.say('电脑先手，轮到你时点击发光的落点');
+      this.later(() => this.aiTurn(), 500);
+    } else {
+      this.say('黑白棋开始，你先下');
+    }
   }
 
   render() {
@@ -94,36 +110,36 @@ export default class ReversiGame extends Game {
     }
 
     let legalCount = 0;
-    if (!this.over && this.turn === HUMAN) {
-      const moves = legalMoves(this.board, HUMAN);
+    if (!this.over && this.turn === this.human) {
+      const moves = legalMoves(this.board, this.human);
       legalCount = moves.length;
       if (save.settings.hints) moves.forEach((m) => this.cells[m.r * SIZE + m.c].classList.add('is-legal'));
     }
 
     const { black, white } = count(this.board);
-    this.hud.patch('me', black);
-    this.hud.patch('ai', white);
+    this.hud.patch('me', this.human === BLACK ? black : white);
+    this.hud.patch('ai', this.ai === BLACK ? black : white);
 
-    this.turnDot.classList.toggle('is-black', this.turn === HUMAN);
-    this.turnDot.classList.toggle('is-white', this.turn !== HUMAN);
+    this.turnDot.classList.toggle('is-black', this.turn === BLACK);
+    this.turnDot.classList.toggle('is-white', this.turn === WHITE);
     if (this.over) this.tipText.textContent = '本局结束';
-    else if (this.turn === HUMAN) this.tipText.textContent = `轮到你 · 可落点 ${legalCount} 处`;
+    else if (this.turn === this.human) this.tipText.textContent = `轮到你 · 可落点 ${legalCount} 处`;
     else this.tipText.textContent = '电脑思考中…';
   }
 
   async play(r, c) {
-    if (this.over || this.busy || this.turn !== HUMAN) return;
-    const move = legalMoves(this.board, HUMAN).find((m) => m.r === r && m.c === c);
+    if (this.over || this.busy || this.turn !== this.human) return;
+    const move = legalMoves(this.board, this.human).find((m) => m.r === r && m.c === c);
     if (!move) return;
     this.busy = true;
-    const res = applyMove(this.board, r, c, HUMAN);
+    const res = applyMove(this.board, r, c, this.human);
     this.board = res.board;
     this.lastMove = { i: r * SIZE + c };
     this.sound.play('place');
     this.render();
     await sleep(280);
 
-    this.turn = AI;
+    this.turn = this.ai;
     this.hud.patch('state', '电脑思考');
     this.render();
     await this.aiTurn();
@@ -132,26 +148,26 @@ export default class ReversiGame extends Game {
   async aiTurn() {
     let guard = 0;
     while (!this.over && guard++ < 4) {
-      if (this.turn === AI) {
-        if (!hasMove(this.board, AI)) {
+      if (this.turn === this.ai) {
+        if (!hasMove(this.board, this.ai)) {
           toast('电脑无子可下，跳过');
-          this.turn = HUMAN;
+          this.turn = this.human;
           continue;
         }
         await sleep(420);
-        const mv = chooseMove(this.board, AI, this.depth);
-        if (!mv) { this.turn = HUMAN; continue; }
-        const res = applyMove(this.board, mv.r, mv.c, AI);
+        const mv = chooseMove(this.board, this.ai, this.depth);
+        if (!mv) { this.turn = this.human; continue; }
+        const res = applyMove(this.board, mv.r, mv.c, this.ai);
         this.board = res.board;
         this.lastMove = { i: mv.r * SIZE + mv.c };
         this.sound.play('place');
         this.render();
-        this.turn = HUMAN;
+        this.turn = this.human;
         await sleep(220);
       }
-      if (!hasMove(this.board, HUMAN)) {
+      if (!hasMove(this.board, this.human)) {
         toast('你无子可下，自动跳过');
-        this.turn = AI;
+        this.turn = this.ai;
         await sleep(400);
         continue;
       }
@@ -166,10 +182,12 @@ export default class ReversiGame extends Game {
   gameOver() {
     this.over = true;
     const { black, white } = count(this.board);
-    const win = black > white;
-    const draw = black === white;
-    const diff = Math.abs(black - white);
-    const score = win ? 400 + diff * 15 : draw ? 220 : Math.max(60, 100 + black * 5);
+    const mine = this.human === BLACK ? black : white;
+    const theirs = this.ai === BLACK ? black : white;
+    const win = mine > theirs;
+    const draw = mine === theirs;
+    const diff = Math.abs(mine - theirs);
+    const score = win ? 400 + diff * 15 : draw ? 220 : Math.max(60, 100 + mine * 5);
     this.render();
     this.hud.patch('state', win ? '你赢了' : draw ? '平局' : '电脑赢');
     this.finish({
@@ -177,11 +195,11 @@ export default class ReversiGame extends Game {
       stars: win ? 3 : draw ? 2 : 1,
       mode: 'max',
       title: win ? '漂亮的围剿！' : draw ? '势均力敌' : '再来一局？',
-      message: win ? `你以 ${black} : ${white} 获胜` : draw ? `${black} : ${white} 打平` : `${black} : ${white} 惜败`,
+      message: win ? `你以 ${mine} : ${theirs} 获胜` : draw ? `${mine} : ${theirs} 打平` : `${mine} : ${theirs} 惜败`,
       speak: win ? '你赢啦' : draw ? '平局' : '这局输了，再来一次吧',
       stats: [
-        { label: '你的棋子', value: black },
-        { label: '电脑棋子', value: white },
+        { label: '你的棋子', value: mine },
+        { label: '电脑棋子', value: theirs },
         { label: '难度', value: this.meta.levels.find((l) => l.id === this.options.level)?.name || '-' },
       ],
     });

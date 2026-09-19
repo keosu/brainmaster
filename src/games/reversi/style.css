@@ -17,6 +17,8 @@
   width: min(96vw, var(--fit-w, 92vw), var(--fit-h, 92vw), 680px);
   aspect-ratio: 1;
   gap: 3px;
+  /* 星位落到格线缝隙正中：格子边框 1px + 半个 gap(3px) = 2.5px */
+  --rev-star-off: 2.5px;
   padding: 12px;
   border-radius: 22px;
   /* 外框：金属拉丝 + 高光边 */
@@ -43,16 +45,20 @@
   pointer-events: none;
 }
 
-/* 四个星位 */
+/* 四个星位：锚在格线交叉点上（格 (2,2)(2,6)(6,2)(6,6) 的左上角缝隙正中），
+   做成围棋星位式的小圆点，而不是落在格子内部 */
 .rev-star {
   position: absolute;
-  width: 7px; height: 7px;
+  left: 0;
+  top: 0;
+  width: 15%;
+  height: 15%;
   border-radius: 50%;
-  transform: translate(-50%, -50%);
-  background: rgba(154, 192, 255, .38);
-  box-shadow: 0 0 6px rgba(110, 231, 255, .25);
+  background: rgba(154, 192, 255, .6);
+  box-shadow: 0 0 6px rgba(110, 231, 255, .4);
+  transform: translate(calc(-50% - var(--rev-star-off)), calc(-50% - var(--rev-star-off)));
   pointer-events: none;
-  z-index: 2;
+  z-index: 0;
 }
 
 /* ---------- 格子 ---------- */
@@ -72,15 +78,20 @@
   border-color: rgba(110, 231, 255, .35);
 }
 
-/* 可落点：青色小圆 + 呼吸 */
+/* 可落点：青色小圆 + 呼吸（绝对定位居中，避免与棋子抢占格内布局） */
 .rev-cell.is-legal::before {
   content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
   width: 26%;
   height: 26%;
+  margin: -13% 0 0 -13%;
   border-radius: 50%;
   background: rgba(110, 231, 255, .5);
   box-shadow: 0 0 12px rgba(110, 231, 255, .75);
   animation: revHint 1.7s ease-in-out infinite;
+  z-index: 2;
 }
 @keyframes revHint {
   0%, 100% { transform: scale(.72); opacity: .45; }
@@ -189,6 +200,6 @@
 .rev-turn-dot.is-white { background: radial-gradient(circle at 34% 27%, #fff, #a6b4cc 72%); }
 
 @media (max-width: 480px) {
-  .rev-board { gap: 2px; padding: 8px; border-radius: 16px; }
+  .rev-board { gap: 2px; --rev-star-off: 2px; padding: 8px; border-radius: 16px; }
   .rev-board::before { inset: 8px; }
 }

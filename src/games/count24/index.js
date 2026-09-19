@@ -19,6 +19,7 @@ export default class Count24Game extends Game {
   async mount() {
     this.max = Number(this.options.max || 9);
     this.cards = dealCards(4, this.max);
+    this.exprs = this.cards.map((v) => String(v)); // 每张牌对应的算式字符串
     this.history = [];
     this.steps = 0;
     this.undos = 0;
@@ -114,9 +115,12 @@ export default class Count24Game extends Game {
       this.sound.play('bad');
       return;
     }
-    this.history.push({ cards: this.cards.slice(), steps: this.steps });
+    this.history.push({ cards: this.cards.slice(), exprs: this.exprs.slice(), steps: this.steps });
+    const expr = `(${this.exprs[i]} ${op.id} ${this.exprs[j]})`;
     this.cards = this.cards.filter((_, k) => k !== i && k !== j);
+    this.exprs = this.exprs.filter((_, k) => k !== i && k !== j);
     this.cards.splice(Math.min(i, j), 0, v);
+    this.exprs.splice(Math.min(i, j), 0, expr);
     this.steps += 1;
     this.sel = [];
     this.sound.play('good');
@@ -132,6 +136,7 @@ export default class Count24Game extends Game {
     if (this.done || !this.history.length) return;
     const prev = this.history.pop();
     this.cards = prev.cards;
+    this.exprs = prev.exprs;
     this.steps = prev.steps;
     this.undos += 1;
     this.sel = [];
@@ -145,17 +150,18 @@ export default class Count24Game extends Game {
     this.timer.stop();
     const sec = (this.timer.ms || 0) / 1000;
     const stars = sec <= 25 ? 3 : sec <= 60 ? 2 : 1;
-    this.tip.textContent = `算出来了！用时 ${sec.toFixed(1)} 秒`;
+    const exprText = `${this.exprs[0].replace(/^\((.*)\)$/, '$1')} = ${this.target}`;
+    this.tip.textContent = `${exprText} · 用时 ${sec.toFixed(1)} 秒`;
     this.sound.play('win');
     this.finish({
       score: Number(sec.toFixed(1)),
       mode: 'min',
       stars,
       title: '算出来了！',
-      message: `用时 ${sec.toFixed(1)} 秒 · 合并 ${this.steps} 次`,
+      message: `${exprText}　·　用时 ${sec.toFixed(1)} 秒`,
       speak: `用时 ${sec.toFixed(1)} 秒算出二十四`,
       stats: [
-        { label: '用时', value: `${sec.toFixed(1)}s` },
+        { label: '算式', value: exprText },
         { label: '合并次数', value: this.steps },
         { label: '撤销次数', value: this.undos },
       ],
