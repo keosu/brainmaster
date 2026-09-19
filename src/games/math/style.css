@@ -1,0 +1,49 @@
+/* 自适应舞台：占满可用空间，题目在上、四个选项铺满下半部分 */
+.m-stage {
+  width: min(96vw, var(--fit-w, 90vw), 760px);
+  max-width: 100%;
+  height: var(--fit-h, 62vh);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(12px, 2.6vh, 26px);
+}
+
+.math-q {
+  flex: 0 0 auto;
+  font-size: clamp(38px, min(12vw, 11vh), 104px);
+  font-weight: 900;
+  font-family: var(--font-num);
+  letter-spacing: 2px;
+  padding: clamp(10px, 2.2vh, 22px) clamp(20px, 4vw, 46px);
+  border-radius: 24px;
+  background: rgba(255, 255, 255, .05);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-1);
+  text-align: center;
+}
+
+.math-opts {
+  flex: 1 1 auto;
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(120px, 1fr));
+  grid-template-rows: repeat(2, minmax(64px, 1fr));
+  gap: clamp(10px, 1.8vh, 18px);
+}
+
+.math-opt {
+  padding: 0;
+  font-size: clamp(26px, 6.2vmin, 52px);
+  font-weight: 800;
+  font-family: var(--font-num);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, .07);
+  border: 1px solid var(--border);
+  transition: transform .12s, background .15s, box-shadow .15s;
+}
+.math-opt:hover { background: rgba(255, 255, 255, .14); }
+.math-opt:active { transform: scale(.96); }
+.math-opt.is-right { background: rgba(74, 222, 128, .28); border-color: var(--c-green); box-shadow: 0 0 22px rgba(74, 222, 128, .45); }
+.math-opt.is-wrong { background: rgba(255, 93, 93, .26); border-color: var(--c-red); }

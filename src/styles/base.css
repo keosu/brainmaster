@@ -1,0 +1,124 @@
+/* Brain Master · 基础样式 / 设计令牌 */
+:root {
+  --bg-0: #070b18;
+  --bg-1: #0d1430;
+  --bg-2: #141c3d;
+  /* 面板用带蓝调的玻璃，而不是纯白叠加 —— 白色叠加会让整页发灰 */
+  --panel: linear-gradient(160deg, rgba(54, 72, 134, 0.5), rgba(18, 25, 54, 0.5));
+  --panel-2: linear-gradient(160deg, rgba(76, 98, 172, 0.62), rgba(30, 40, 80, 0.62));
+  --border: rgba(132, 166, 255, 0.2);
+  --border-strong: rgba(154, 192, 255, 0.38);
+
+  --ink: #f2f6ff;
+  --ink-2: #c5d1ee;
+  --ink-3: #8e9dc6;
+
+  --c-cyan: #6ee7ff;
+  --c-blue: #5b8cff;
+  --c-violet: #b46bff;
+  --c-pink: #ff6b9d;
+  --c-amber: #ffd166;
+  --c-green: #4ade80;
+  --c-red: #ff5d5d;
+  --c-orange: #ff9f45;
+
+  --grad-hero: linear-gradient(135deg, #6ee7ff 0%, #5b8cff 45%, #b46bff 100%);
+  --grad-pop: linear-gradient(135deg, #ffd166 0%, #ff6b9d 100%);
+  --grad-cool: linear-gradient(135deg, #4ade80 0%, #6ee7ff 100%);
+
+  --r-sm: 10px;
+  --r-md: 16px;
+  --r-lg: 24px;
+  --r-xl: 32px;
+
+  --shadow-1: 0 6px 18px rgba(0, 0, 0, 0.35);
+  --shadow-2: 0 18px 48px rgba(0, 0, 0, 0.45);
+  --glow-cyan: 0 0 24px rgba(110, 231, 255, 0.45);
+
+  --font: "PingFang SC", "HarmonyOS Sans SC", "Microsoft YaHei", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --font-num: "DIN Alternate", "Bahnschrift", "SF Mono", ui-monospace, "Consolas", monospace;
+
+  --safe-t: env(safe-area-inset-top, 0px);
+  --safe-b: env(safe-area-inset-bottom, 0px);
+}
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+/* App 外壳占满一屏，页面内部滚动 —— 避免游戏区把整页撑高后反复重算尺寸 */
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg-0);
+  color: var(--ink);
+  font-family: var(--font);
+  overscroll-behavior: none;
+}
+
+body {
+  background:
+    radial-gradient(900px 620px at 10% -8%, rgba(110, 231, 255, 0.22), transparent 62%),
+    radial-gradient(820px 560px at 104% 6%, rgba(180, 107, 255, 0.2), transparent 62%),
+    radial-gradient(760px 620px at 50% 118%, rgba(91, 140, 255, 0.16), transparent 62%),
+    linear-gradient(180deg, #05091a, #0a1130 60%, #080d20);
+  background-attachment: fixed;
+}
+
+body::before {
+  /* 网格底纹 */
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.028) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.028) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: radial-gradient(circle at 50% 30%, #000 30%, transparent 78%);
+  z-index: 0;
+}
+
+#app { position: relative; z-index: 1; min-height: 100%; }
+
+button { font-family: inherit; color: inherit; border: none; background: none; cursor: pointer; }
+input, select { font-family: inherit; }
+
+h1, h2, h3, h4, p { margin: 0; }
+
+::selection { background: rgba(110, 231, 255, 0.35); }
+
+/* 滚动条 */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.14); border-radius: 99px; }
+::-webkit-scrollbar-track { background: transparent; }
+
+/* 启动动画 */
+.boot {
+  min-height: 60vh;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 18px;
+  color: var(--ink-2);
+}
+.boot__brain {
+  width: 76px; height: 76px; border-radius: 50%;
+  background: var(--grad-hero);
+  animation: pulse 1.2s ease-in-out infinite;
+  box-shadow: var(--glow-cyan);
+}
+@keyframes pulse {
+  0%, 100% { transform: scale(0.86); opacity: 0.75; }
+  50% { transform: scale(1.06); opacity: 1; }
+}
+
+/* 工具类 */
+.u-hide { display: none !important; }
+.u-center { display: grid; place-items: center; }
+.u-num { font-family: var(--font-num); font-variant-numeric: tabular-nums; }
+.u-mono { font-family: var(--font-num); }
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+}

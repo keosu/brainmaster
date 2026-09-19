@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="zh-CN" data-page-node-id="iN198LeqmIS3dJrL9hBdhY">
+<head data-page-node-id="5HgE8lEtGyZc6NsJ1Jh5FJ">
+<meta charset="utf-8" data-page-node-id="sbeIFqOl1vxQcb62Eo8HBQ" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no" data-page-node-id="UJx3IXhwKzgT7lFY7HOGDx" />
+<meta name="theme-color" content="#0a0e1f" data-page-node-id="trm7WhObO59j6AjuDxpPD8" />
+<title>Brain Master · 脑力大师</title>
+<link rel="stylesheet" href="./src/styles/base.css" data-page-node-id="4gNDPR39lVT8IdcKXzJPEI" />
+<link rel="stylesheet" href="./src/styles/layout.css" data-page-node-id="owXBINs7AEvtj6Jkf4BxSY" />
+<link rel="stylesheet" href="./src/styles/components.css" data-page-node-id="qL0xcUoiyBafW2Y2g6wbWC" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='44' fill='%236ee7ff'/%3E%3Cpath d='M50 8a42 42 0 0 0 0 84z' fill='%23b46bff'/%3E%3C/svg%3E" data-page-node-id="tggsyxgOxkmDyPjOOeUNOQ" />
+</head>
+<body data-page-node-id="01qO4VYVBlXb7kKBjleqsy">
+  <script>
+    // 兜底：模块加载失败时给出可见提示，避免只剩空白页
+    (function () {
+      function fail(msg) {
+        var app = document.getElementById('app');
+        if (!app) return;
+        app.innerHTML = '<div style="padding:28px;font:14px/1.7 system-ui;color:#e6ecff">' +
+          '<h2 style="margin:0 0 10px">页面没能启动</h2>' +
+          '<p style="color:#8fa0c7;margin:0 0 14px">' + msg + '</p>' +
+          '<p style="color:#8fa0c7;margin:0">请用本地服务器打开（不要直接双击 index.html）：<br>' +
+          '<code style="color:#6ee7ff">python serve.py</code> 然后访问 <code style="color:#6ee7ff">http://127.0.0.1:8123/index.html</code></p></div>';
+      }
+      window.addEventListener('error', function (e) {
+        if (e && e.message && /Failed to (fetch|resolve)|module/i.test(e.message)) fail(e.message);
+      });
+      setTimeout(function () {
+        if (document.querySelector('.boot')) {
+          fail('脚本加载超时，可能是通过 file:// 直接打开，导致 ES 模块被浏览器拦截。');
+        }
+      }, 4000);
+    })();
+  </script>
+  <div id="app" class="app" data-page-node-id="ugIc3GrHbjFBk6Ef4BZLvg">
+    <div class="boot" data-page-node-id="nG2lsLKr2HfKA1uKqpXEOH">
+      <div class="boot__brain" data-page-node-id="QNNWqNYT4BHAYRU6BUGdxe"></div>
+      <p data-page-node-id="iKSg5XE1DzF2qGWAvmAfuE">加载中…</p>
+    </div>
+  </div>
+  <div id="overlay-root" data-page-node-id="0ivY8hZsbzbD8ht2SRhO1S"></div>
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>

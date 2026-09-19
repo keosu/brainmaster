@@ -1,0 +1,210 @@
+/* Brain Master · 布局：外壳 / 首页 / 游戏页 */
+.shell {
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 内容区：整体高度受控，首页在这里内部滚动 */
+.shell__content {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ---------- 顶栏 ---------- */
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: calc(12px + var(--safe-t)) 18px 12px;
+  backdrop-filter: blur(14px);
+  background: linear-gradient(180deg, rgba(9, 13, 30, 0.92), rgba(9, 13, 30, 0.55));
+  border-bottom: 1px solid var(--border);
+}
+.topbar__back {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 14px 8px 10px;
+  border-radius: 99px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  font-size: 14px;
+  transition: transform .15s, background .15s;
+}
+.topbar__back:hover { background: var(--panel-2); transform: translateX(-2px); }
+.topbar__title { font-size: 17px; font-weight: 700; letter-spacing: .5px; }
+.topbar__sub { font-size: 12px; color: var(--ink-3); }
+.topbar__spacer { flex: 1; }
+.topbar__actions { display: flex; gap: 8px; }
+
+.icon-btn {
+  width: 38px; height: 38px;
+  display: grid; place-items: center;
+  border-radius: 12px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  font-size: 16px;
+  transition: background .15s, transform .15s;
+}
+.icon-btn:hover { background: var(--panel-2); }
+.icon-btn:active { transform: scale(0.92); }
+.icon-btn.is-off { opacity: .45; }
+
+/* ---------- 首页 ---------- */
+.home {
+  width: min(1180px, 100%);
+  margin: 0 auto;
+  padding: 26px 18px 60px;
+  display: flex;
+  flex-direction: column;
+  gap: 26px;
+}
+
+.hero {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--r-xl);
+  padding: 30px 30px 26px;
+  background: linear-gradient(135deg, rgba(110, 231, 255, 0.14), rgba(180, 107, 255, 0.14));
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-2);
+}
+.hero::after {
+  content: "";
+  position: absolute;
+  width: 340px; height: 340px;
+  right: -110px; top: -140px;
+  background: radial-gradient(circle, rgba(110, 231, 255, 0.35), transparent 65%);
+  pointer-events: none;
+}
+.hero__brand { display: flex; align-items: center; gap: 14px; }
+.hero__logo {
+  width: 58px; height: 58px;
+  border-radius: 18px;
+  background: var(--grad-hero);
+  box-shadow: var(--glow-cyan);
+  display: grid; place-items: center;
+  font-size: 30px;
+}
+.hero__title {
+  font-size: clamp(28px, 5.6vw, 46px);
+  font-weight: 900;
+  letter-spacing: 1px;
+  background: var(--grad-hero);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  line-height: 1.05;
+}
+.hero__slogan { margin-top: 8px; color: var(--ink-2); font-size: 14px; }
+
+.hero__stats {
+  margin-top: 22px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+}
+.stat {
+  background: rgba(8, 12, 28, 0.55);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 14px 16px;
+}
+.stat__k { font-size: 12px; color: var(--ink-3); letter-spacing: .6px; }
+.stat__v { font-size: 26px; font-weight: 800; margin-top: 4px; }
+.stat__v--grad { background: var(--grad-pop); -webkit-background-clip: text; background-clip: text; color: transparent; }
+
+.levelbar { margin-top: 8px; height: 8px; border-radius: 99px; background: rgba(132, 166, 255, .16); overflow: hidden; }
+.levelbar__fill { height: 100%; border-radius: 99px; background: var(--grad-hero); transition: width .6s cubic-bezier(.22,1,.36,1); }
+
+/* 分区标题 */
+.section__head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 14px; }
+.section__title { font-size: 18px; font-weight: 800; }
+.section__hint { font-size: 12px; color: var(--ink-3); }
+
+/* 游戏网格 */
+.grid-games {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 16px;
+}
+
+/* 每日训练条 */
+.daily {
+  display: flex; align-items: center; gap: 18px;
+  padding: 20px 22px;
+  border-radius: var(--r-lg);
+  background: linear-gradient(120deg, rgba(255, 209, 102, .16), rgba(255, 107, 157, .16));
+  border: 1px solid rgba(255, 209, 102, .3);
+  flex-wrap: wrap;
+}
+.daily__icon { font-size: 34px; }
+.daily__text { flex: 1; min-width: 200px; }
+.daily__t { font-weight: 800; font-size: 17px; }
+.daily__d { font-size: 13px; color: var(--ink-2); margin-top: 4px; }
+
+/* 主题选择行 */
+.themes {
+  display: flex; gap: 10px; overflow-x: auto; padding-bottom: 6px;
+  scrollbar-width: none;
+}
+.themes::-webkit-scrollbar { display: none; }
+
+/* ---------- 游戏页 ---------- */
+.stage {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  width: min(1080px, 100%);
+  margin: 0 auto;
+  padding: 14px 16px calc(28px + var(--safe-b));
+  gap: 14px;
+}
+.stage__hud, .stage__train { flex: none; }
+.stage__body {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+.game-root {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+/* 训练进度条 */
+.trainbar { display: flex; gap: 8px; align-items: center; justify-content: center; flex-wrap: wrap; }
+.trainbar__chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 12px; border-radius: 99px;
+  font-size: 12px; color: var(--ink-3);
+  background: var(--panel); border: 1px solid var(--border);
+}
+.trainbar__chip.is-done { color: var(--c-green); border-color: rgba(74, 222, 128, .4); }
+.trainbar__chip.is-now { color: #06121f; background: var(--grad-hero); border-color: transparent; font-weight: 700; }
+
+@media (max-width: 640px) {
+  .hero { padding: 22px 18px; border-radius: var(--r-lg); }
+  .grid-games { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
+  .topbar { padding: calc(10px + var(--safe-t)) 12px 10px; }
+  .stage { padding: 12px 10px calc(24px + var(--safe-b)); }
+}

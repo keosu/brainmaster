@@ -1,0 +1,10 @@
+# 强制文本文件以 LF 换行，保证 Linux CI 上的 shell 脚本（gradlew 等）可正常执行
+* text=auto eol=lf
+*.bat text eol=crlf
+
+# 二进制资源不换行转换
+*.png binary
+*.jpg binary
+*.ico binary
+*.jar binary
+*.keystore binary

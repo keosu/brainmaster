@@ -1,0 +1,28 @@
+# 依赖与构建产物
+node_modules/
+dist/
+
+# Android 原生构建产物（保留 android/ 源码，忽略编译缓存）
+android/.gradle/
+android/app/build/
+android/build/
+android/local.properties
+android/app/src/main/assets/public/   # Capacitor 每次 cap sync 会从 dist/ 重新生成
+*.iml
+
+# 出包 / 密钥
+*.apk
+*.aab
+*.keystore
+android/**/*.keystore
+
+# 环境变量 / 本地配置
+.env
+.env.*
+
+# 本地智能体数据（含记忆，不入库）
+.workbuddy/
+
+# 系统 / 编辑器
+.DS_Store
+Thumbs.db

@@ -1,0 +1,23 @@
+.odd-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--cols, 3), 1fr);
+  gap: clamp(8px, 2vw, 16px);
+  width: min(96vw, var(--fit-w, 92vw), calc(var(--fit-h, 92vw) * var(--cols, 3) / var(--rows, 3) * 0.96), 760px);
+}
+
+.odd-item {
+  aspect-ratio: 1;
+  border-radius: 20px;
+  background-color: rgba(255, 255, 255, .06);
+  background-size: 84% 84%;
+  background-repeat: no-repeat;
+  background-position: center;
+  border: 1px solid var(--border);
+  transition: box-shadow .18s, filter .15s, transform .15s;
+}
+.odd-item:hover { background-color: rgba(255, 255, 255, .12); }
+.odd-item.is-right {
+  box-shadow: 0 0 0 3px var(--c-green) inset, 0 0 26px rgba(74, 222, 128, .55);
+  animation: matched .4s ease;
+}
+.odd-item.is-wrong { box-shadow: 0 0 0 3px var(--c-red) inset; animation: shake .3s; }

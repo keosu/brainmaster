@@ -1,0 +1,91 @@
+.c24-target {
+  display: inline-flex; align-items: baseline; gap: 10px;
+  padding: 8px 18px;
+  border-radius: 99px;
+  background: linear-gradient(120deg, rgba(255, 209, 102, .16), rgba(255, 107, 157, .16));
+  border: 1px solid rgba(255, 209, 102, .32);
+}
+.c24-target__k { font-size: 12px; color: var(--ink-2); letter-spacing: 1px; }
+.c24-target__v {
+  font-family: var(--font-num);
+  font-size: 28px; font-weight: 900;
+  background: var(--grad-pop);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+
+/* 自适应舞台：四张牌尽量撑满，运算符紧随其下 */
+.c24-stage {
+  width: min(96vw, var(--fit-w, 92vw), 900px);
+  max-width: 100%;
+  height: var(--fit-h, 62vh);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(10px, 2.2vh, 26px);
+}
+
+.c24-cards {
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(8px, 2.4vw, 24px);
+  width: 100%;
+  min-height: 0;
+}
+
+.c24-card {
+  flex: 0 1 auto;
+  width: clamp(58px, 18vw, 148px);
+  height: 100%;
+  max-height: 300px;
+  aspect-ratio: 3 / 4;
+  border-radius: 16px;
+  font-family: var(--font-num);
+  font-size: clamp(26px, 7vmin, 56px);
+  font-weight: 900;
+  color: #06131f;
+  background: linear-gradient(165deg, #ffffff, #cfd9ee);
+  border: 1px solid rgba(255, 255, 255, .8);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, .45);
+  transition: transform .16s, box-shadow .16s, filter .16s;
+}
+.c24-card:hover { transform: translateY(-4px); }
+.c24-card.is-sel {
+  background: var(--grad-hero);
+  color: #06131f;
+  box-shadow: 0 0 0 3px rgba(110, 231, 255, .55), 0 14px 28px rgba(0, 0, 0, .5);
+  transform: translateY(-8px) scale(1.03);
+}
+
+.c24-ops {
+  flex: 0 0 auto;
+  display: flex; gap: clamp(8px, 2vw, 16px); justify-content: center;
+  opacity: .35;
+  transition: opacity .18s;
+  pointer-events: none;
+}
+.c24-ops.is-on { opacity: 1; pointer-events: auto; }
+
+.c24-op {
+  width: clamp(50px, 9vmin, 82px);
+  height: clamp(50px, 9vmin, 82px);
+  border-radius: 14px;
+  font-size: clamp(20px, 5vmin, 34px);
+  font-weight: 900;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  transition: transform .14s, background .16s, box-shadow .16s;
+}
+.c24-op:hover {
+  transform: translateY(-3px);
+  background: var(--grad-hero);
+  color: #06131f;
+  box-shadow: 0 10px 22px rgba(91, 140, 255, .4);
+}
+
+@media (max-width: 480px) {
+  .c24-target { padding: 6px 14px; }
+  .c24-target__v { font-size: 22px; }
+}

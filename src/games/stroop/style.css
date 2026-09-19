@@ -1,0 +1,49 @@
+/* 自适应舞台：大字在上，彩色按钮铺满剩余空间 */
+.st-stage {
+  width: min(96vw, var(--fit-w, 94vw), 820px);
+  max-width: 100%;
+  height: var(--fit-h, 62vh);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(12px, 2.4vh, 30px);
+}
+
+.stroop-word {
+  flex: 0 0 auto;
+  font-size: clamp(46px, min(17vw, 15vh), 150px);
+  font-weight: 900;
+  letter-spacing: 6px;
+  text-shadow: 0 10px 30px rgba(0, 0, 0, .55);
+  min-height: 1.2em;
+  display: grid;
+  place-items: center;
+}
+
+.stroop-btns {
+  flex: 1 1 auto;
+  display: flex;
+  gap: clamp(8px, 1.6vw, 16px);
+  flex-wrap: wrap;
+  align-items: stretch;
+  justify-content: center;
+  width: 100%;
+  max-height: 46%;
+}
+
+.stroop-btn {
+  flex: 1 1 78px;
+  max-width: 200px;
+  min-width: 72px;
+  padding: 16px 10px;
+  border-radius: 18px;
+  font-size: clamp(20px, 4.6vmin, 40px);
+  font-weight: 900;
+  color: #0d1020;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, .35);
+  transition: transform .12s, filter .15s;
+}
+.stroop-btn:hover { filter: brightness(1.1); }
+.stroop-btn:active { transform: scale(.94); }
+.stroop-btn.is-right { outline: 4px solid #fff; outline-offset: 2px; }

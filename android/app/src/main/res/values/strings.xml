@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Brain Master</string>
+    <string name="title_activity_main">Brain Master</string>
+    <string name="package_name">com.brainmaster.app</string>
+    <string name="custom_url_scheme">com.brainmaster.app</string>
+</resources>

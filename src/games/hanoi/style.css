@@ -1,0 +1,83 @@
+.hn-board {
+  --disc-h: 30px;      /* 由 JS 按可用空间动态调整 */
+  --rods-bottom: 44px; /* 叠放区距底板底部的距离 */
+  position: relative;
+  width: min(96vw, var(--fit-w, 94vw), 900px);
+  max-width: 100%;
+  height: calc(var(--n, 3) * var(--disc-h) + 74px);
+  border-radius: 20px;
+  padding: 12px;
+  background:
+    radial-gradient(circle at 50% 20%, rgba(110, 231, 255, .08), transparent 60%),
+    linear-gradient(160deg, #16283f, #0c1a2c);
+  border: 1px solid rgba(154, 192, 255, .22);
+  box-shadow: inset 0 0 28px rgba(0, 0, 0, .5), 0 16px 38px rgba(0, 0, 0, .42);
+}
+
+/* 三根立柱 */
+.hn-rod {
+  position: absolute;
+  bottom: var(--rods-bottom);
+  top: 16px;
+  width: 10px;
+  transform: translateX(-50%);
+  border-radius: 6px 6px 0 0;
+  background: linear-gradient(90deg, rgba(154, 192, 255, .18), rgba(220, 235, 255, .55), rgba(154, 192, 255, .18));
+  box-shadow: 0 0 14px rgba(110, 231, 255, .25);
+}
+
+/* 底座 */
+.hn-board::after {
+  content: "";
+  position: absolute;
+  left: 12px; right: 12px; bottom: 30px;
+  height: 12px;
+  border-radius: 8px;
+  background: linear-gradient(180deg, #2b4a6b, #16283f);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .18);
+}
+
+.hn-discs { position: absolute; inset: 0; pointer-events: none; }
+
+.hn-disc {
+  position: absolute;
+  height: calc(var(--disc-h, 30px) - 5px);
+  border-radius: 999px;
+  transform: translateX(-50%);
+  border: 1px solid rgba(0, 0, 0, .35);
+  box-shadow: inset 0 2px 4px rgba(255, 255, 255, .35), inset 0 -3px 6px rgba(0, 0, 0, .35), 0 4px 10px rgba(0, 0, 0, .45);
+  transition: left .3s cubic-bezier(.25, .9, .3, 1), bottom .3s cubic-bezier(.25, .9, .3, 1), transform .18s;
+}
+.hn-disc.is-up {
+  transform: translateX(-50%) translateY(-16px) scale(1.04);
+  box-shadow: 0 0 18px rgba(255, 255, 255, .45), 0 8px 16px rgba(0, 0, 0, .5);
+}
+
+/* 三列点击热区 */
+.hn-zones {
+  position: absolute;
+  inset: 0 0 var(--rods-bottom);
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+}
+.hn-zone {
+  position: relative;
+  border-radius: 14px;
+  background: transparent;
+  transition: background .16s, box-shadow .16s;
+}
+.hn-zone:hover {
+  background: rgba(110, 231, 255, .09);
+  box-shadow: inset 0 0 0 1px rgba(110, 231, 255, .28);
+}
+.hn-zone__no {
+  position: absolute;
+  bottom: -26px; left: 50%;
+  transform: translateX(-50%);
+  font-size: 12px;
+  color: var(--ink-3);
+}
+
+@media (max-width: 480px) {
+  .hn-board { padding: 10px 8px 0; }
+}
