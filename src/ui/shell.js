@@ -22,17 +22,18 @@ export function boot(app) {
     el('span.topbar__back-label', { text: '首页' }),
   ]);
 
-  const titleBox = el('div', {}, [
-    el('div.topbar__title', { text: 'Brain Master' }),
-    el('div.topbar__sub', { text: '脑力训练营' }),
+  const titleBox = el('div.topbar__titlebox', {}, [
+    el('span.topbar__title', { text: 'Brain Master' }),
+    el('span.topbar__sub', { text: '脑力训练营' }),
   ]);
 
-  const brand = el('div', { style: { display: 'flex', alignItems: 'center', gap: '10px' } }, [
+  const brand = el('div.topbar__brand', {}, [
     el('div', {
       text: '🧠',
       style: { width: '36px', height: '36px', borderRadius: '12px', display: 'grid', placeItems: 'center', background: 'var(--grad-hero)', fontSize: '19px' },
     }),
     el('div.topbar__title.topbar__title--brand', { text: 'Brain Master' }),
+    el('span.topbar__slogan', { text: '每天 5 分钟，练出最强大脑' }),
   ]);
 
   const btnSound = iconBtn('🔊', () => {

@@ -6,18 +6,45 @@
 }
 
 .odd-item {
+  position: relative;
   aspect-ratio: 1;
-  border-radius: 20px;
+  border-radius: 22px;
+  overflow: hidden;
+  /* 背景图由内联 style 提供（主题图案），这里只定底色与铺放方式 */
   background-color: rgba(255, 255, 255, .06);
-  background-size: 84% 84%;
+  background-size: 86% 86%;
   background-repeat: no-repeat;
   background-position: center;
   border: 1px solid var(--border);
-  transition: box-shadow .18s, filter .15s, transform .15s;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .1), 0 6px 16px rgba(0, 0, 0, .18);
+  transition: box-shadow .18s, border-color .15s;
+  /* 纯透明度入场，避免 transform/filter 动画盖掉异类自己的变身 */
+  animation: oddIn .26s ease both;
 }
-.odd-item:hover { background-color: rgba(255, 255, 255, .12); }
+/* 顶部高光，让卡片有一点质感（不拦截点击） */
+.odd-item::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(160deg, rgba(255, 255, 255, .12), rgba(255, 255, 255, 0) 46%);
+}
+.odd-item:hover {
+  border-color: rgba(110, 231, 255, .55);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .1), 0 0 18px rgba(110, 231, 255, .28);
+}
 .odd-item.is-right {
+  border-color: transparent;
   box-shadow: 0 0 0 3px var(--c-green) inset, 0 0 26px rgba(74, 222, 128, .55);
   animation: matched .4s ease;
 }
-.odd-item.is-wrong { box-shadow: 0 0 0 3px var(--c-red) inset; animation: shake .3s; }
+.odd-item.is-wrong {
+  box-shadow: 0 0 0 3px var(--c-red) inset;
+  animation: shake .3s;
+}
+
+@keyframes oddIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}

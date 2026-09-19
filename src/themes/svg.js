@@ -200,6 +200,151 @@ export const SHAPES = {
 };
 
 /* ============================================================
+ * 6. 小恐龙（10 只造型各异的可爱恐龙）
+ * ========================================================== */
+/* 通用大眼睛：白底 + 深色瞳孔 + 高光 */
+const dinoEyes = (lx, rx, y = 42, r = 8) =>
+  `<circle cx="${lx}" cy="${y}" r="${r}" fill="#fff"/>
+   <circle cx="${rx}" cy="${y}" r="${r}" fill="#fff"/>
+   <circle cx="${lx + 1.6}" cy="${y + 1.6}" r="${r * .52}" fill="#202d3a"/>
+   <circle cx="${rx + 1.6}" cy="${y + 1.6}" r="${r * .52}" fill="#202d3a"/>
+   <circle cx="${lx - 2.2}" cy="${y - 2.4}" r="${r * .2}" fill="#fff"/>
+   <circle cx="${rx - 2.2}" cy="${y - 2.4}" r="${r * .2}" fill="#fff"/>`;
+
+const dinoSmile = (y = 66, w = 9) =>
+  `<path d="M${50 - w} ${y} Q50 ${y + w + 2} ${50 + w} ${y}" stroke="#2a2230" stroke-width="3" fill="none" stroke-linecap="round"/>`;
+
+const dinoNostrils = (y = 58) =>
+  `<ellipse cx="43" cy="${y}" rx="1.8" ry="2.4" fill="#2a2230" opacity=".55"/>
+   <ellipse cx="57" cy="${y}" rx="1.8" ry="2.4" fill="#2a2230" opacity=".55"/>`;
+
+/* 小短腿：拼进场景大图时贴在脑袋下面 */
+export function dinoLegs(color) {
+  const dark = shade(color, -55);
+  return `<ellipse cx="36" cy="92" rx="10" ry="12" fill="${dark}"/>
+          <ellipse cx="64" cy="92" rx="10" ry="12" fill="${dark}"/>
+          <ellipse cx="34" cy="99" rx="11" ry="6" fill="${shade(color, -72)}"/>
+          <ellipse cx="66" cy="99" rx="11" ry="6" fill="${shade(color, -72)}"/>`;
+}
+
+export const DINOS = {
+  /* 霸王龙：大脑袋 + 小尖牙 */
+  trex: () => wrap(
+    `<path d="M18 30 C10 40 12 54 22 58 L26 46 Z" fill="${shade('#4ade80', -25)}"/>
+     <path d="M82 30 C90 40 88 54 78 58 L74 46 Z" fill="${shade('#4ade80', -25)}"/>
+     <ellipse cx="50" cy="52" rx="35" ry="33" fill="#4ade80" stroke="${shade('#4ade80', -45)}" stroke-width="2"/>
+     <ellipse cx="50" cy="66" rx="22" ry="15" fill="${shade('#4ade80', 28)}"/>
+     ${dinoEyes(37, 63, 40, 9)}
+     <path d="M34 28 L40 34 L46 29" stroke="${shade('#4ade80', -50)}" stroke-width="3" fill="none" stroke-linecap="round"/>
+     ${dinoNostrils(60)}
+     ${dinoSmile(68, 10)}
+     <path d="M40 73 l3 6 l4 -5 M56 73 l4 5 l3 -6" fill="#fff"/>`,
+    grad('dt', shade('#4ade80', 26), shade('#4ade80', -28))
+  ),
+  /* 腕龙：长脖子小脑袋 */
+  bron: () => wrap(
+    `<path d="M42 96 C40 70 42 50 46 40 L58 40 C55 58 58 74 62 96 Z" fill="#2dd4bf" stroke="${shade('#2dd4bf', -45)}" stroke-width="2"/>
+     <ellipse cx="50" cy="92" rx="26" ry="12" fill="#14b8a6"/>
+     <circle cx="52" cy="34" r="21" fill="#2dd4bf" stroke="${shade('#2dd4bf', -45)}" stroke-width="2"/>
+     ${dinoEyes(45, 61, 31, 6)}
+     ${dinoSmile(38, 6)}`,
+    grad('db', shade('#2dd4bf', 24), shade('#2dd4bf', -26))
+  ),
+  /* 三角龙：褶皱颈盾 + 三只角 */
+  tric: () => wrap(
+    `<path d="M50 8 C72 8 86 24 86 46 C86 68 72 84 50 84 C28 84 14 68 14 46 C14 24 28 8 50 8 Z"
+       fill="#3b82f6" stroke="${shade('#3b82f6', -45)}" stroke-width="2"/>
+     <path d="M50 14 C68 14 80 27 80 46 C80 64 68 78 50 78 C32 78 20 64 20 46 C20 27 32 14 50 14 Z"
+       fill="${shade('#3b82f6', 20)}" opacity=".55"/>
+     <path d="M30 22 L20 6 L38 16 Z" fill="#fde68a" stroke="#d9a52e" stroke-width="1.5"/>
+     <path d="M70 22 L80 6 L62 16 Z" fill="#fde68a" stroke="#d9a52e" stroke-width="1.5"/>
+     <path d="M50 30 L46 14 L54 14 Z" fill="#fde68a" stroke="#d9a52e" stroke-width="1.5"/>
+     <ellipse cx="50" cy="54" rx="29" ry="26" fill="#60a5fa" stroke="${shade('#3b82f6', -45)}" stroke-width="2"/>
+     ${dinoEyes(40, 60, 46, 8)}
+     ${dinoNostrils(62)}${dinoSmile(66, 8)}`,
+    grad('dtr', shade('#3b82f6', 26), shade('#3b82f6', -26))
+  ),
+  /* 剑龙：背帆菱形板 */
+  steg: () => wrap(
+    `<path d="M26 40 L34 16 L42 38 L50 12 L58 38 L66 16 L74 40 Z" fill="#f472b6" stroke="#db2777" stroke-width="2" stroke-linejoin="round"/>
+     <ellipse cx="50" cy="58" rx="34" ry="30" fill="#b46bff" stroke="${shade('#b46bff', -45)}" stroke-width="2"/>
+     ${dinoEyes(38, 62, 52, 8)}
+     ${dinoNostrils(66)}${dinoSmile(70, 8)}`,
+    grad('ds', shade('#b46bff', 26), shade('#b46bff', -28))
+  ),
+  /* 翼龙：尖嘴 + 翅膀 */
+  ptero: () => wrap(
+    `<path d="M22 46 C8 36 6 24 10 18 C20 26 30 30 40 34 Z" fill="#67e8f9" stroke="#0e7490" stroke-width="2" stroke-linejoin="round"/>
+     <path d="M78 46 C92 36 94 24 90 18 C80 26 70 30 60 34 Z" fill="#67e8f9" stroke="#0e7490" stroke-width="2" stroke-linejoin="round"/>
+     <ellipse cx="50" cy="48" rx="26" ry="30" fill="#6ee7ff" stroke="#0891b2" stroke-width="2"/>
+     <path d="M50 56 L82 52 L50 64 Z" fill="#fbbf24" stroke="#d97706" stroke-width="2" stroke-linejoin="round"/>
+     <path d="M50 56 L18 52 L50 64 Z" fill="#fcd34d" stroke="#d97706" stroke-width="2" stroke-linejoin="round"/>
+     ${dinoEyes(42, 58, 40, 7)}
+     <path d="M66 60 q4 4 9 1" stroke="#2a2230" stroke-width="2.5" fill="none" stroke-linecap="round"/>`,
+    grad('dp', shade('#6ee7ff', 18), shade('#6ee7ff', -30))
+  ),
+  /* 甲龙：盔甲圆包 + 侧角 */
+  anky: () => wrap(
+    `<path d="M22 44 L10 40 L20 54 Z" fill="#cbd5e1"/>
+     <path d="M78 44 L90 40 L80 54 Z" fill="#cbd5e1"/>
+     <ellipse cx="50" cy="54" rx="35" ry="32" fill="#94a3b8" stroke="#475569" stroke-width="2"/>
+     <g fill="#cbd5e1" stroke="#64748b" stroke-width="1.5">
+       <path d="M32 28 a7 7 0 0 1 14 0 Z"/><path d="M50 22 a7 7 0 0 1 14 0 Z"/>
+       <path d="M24 40 a6 6 0 0 1 12 0 Z"/><path d="M66 40 a6 6 0 0 1 12 0 Z"/>
+     </g>
+     ${dinoEyes(38, 62, 50, 8)}
+     ${dinoNostrils(64)}${dinoSmile(68, 8)}`,
+    grad('da', '#cbd5e1', '#64748b')
+  ),
+  /* 副栉龙：后弯的长头冠 */
+  para: () => wrap(
+    `<path d="M62 26 C84 14 88 -2 76 -8" fill="none" stroke="${shade('#fb923c', -30)}" stroke-width="9" stroke-linecap="round"/>
+     <ellipse cx="50" cy="52" rx="34" ry="32" fill="#fb923c" stroke="${shade('#fb923c', -42)}" stroke-width="2"/>
+     <ellipse cx="52" cy="66" rx="22" ry="16" fill="${shade('#fb923c', 26)}"/>
+     ${dinoEyes(38, 60, 44, 8)}
+     ${dinoNostrils(62)}${dinoSmile(68, 9)}`,
+    grad('dpa', shade('#fb923c', 26), shade('#fb923c', -28))
+  ),
+  /* 棘龙：背帆 + 长吻 */
+  spino: () => wrap(
+    `<path d="M30 34 C34 8 42 4 50 4 C58 4 66 8 70 34 Z" fill="#ef4444" stroke="#b91c1c" stroke-width="2"/>
+     <ellipse cx="50" cy="56" rx="30" ry="26" fill="#f87171" stroke="#b91c1c" stroke-width="2"/>
+     <path d="M40 62 h28 l-6 10 h-16 Z" fill="${shade('#f87171', 24)}"/>
+     ${dinoEyes(38, 56, 48, 7)}
+     <circle cx="68" cy="64" r="2" fill="#2a2230"/>
+     <path d="M46 70 q4 3 8 0" stroke="#2a2230" stroke-width="2.5" fill="none" stroke-linecap="round"/>`,
+    grad('dsp', shade('#f87171', 24), shade('#f87171', -30))
+  ),
+  /* 迅猛龙：条纹 + 锐利眼神 */
+  raptor: () => wrap(
+    `<path d="M16 52 L4 42 L24 44 Z" fill="#eab308"/>
+     <path d="M84 52 L96 42 L76 44 Z" fill="#eab308"/>
+     <ellipse cx="50" cy="52" rx="35" ry="32" fill="#facc15" stroke="#a16207" stroke-width="2"/>
+     <path d="M24 34 q10 -8 20 0 M56 34 q10 -8 20 0" stroke="#a16207" stroke-width="4" fill="none" stroke-linecap="round"/>
+     <ellipse cx="38" cy="46" rx="7" ry="5" fill="#fff" transform="rotate(-12 38 46)"/>
+     <ellipse cx="62" cy="46" rx="7" ry="5" fill="#fff" transform="rotate(12 62 46)"/>
+     <ellipse cx="39" cy="47" rx="2.4" ry="4" fill="#202d3a"/>
+     <ellipse cx="61" cy="47" rx="2.4" ry="4" fill="#202d3a"/>
+     ${dinoNostrils(64)}
+     <path d="M40 70 q10 8 20 0" stroke="#2a2230" stroke-width="3" fill="none" stroke-linecap="round"/>
+     <path d="M46 72 l3 5 l4 -4 M54 72 l4 4 l3 -5" fill="#fff"/>`,
+    grad('dr', shade('#facc15', 24), shade('#facc15', -24))
+  ),
+  /* 恐龙宝宝：从蛋壳里探出头 */
+  baby: () => wrap(
+    `<path d="M20 72 q-4 24 14 26 h32 q18 -2 14 -26 q-2 -8 -8 -8 h-44 q-6 0 -8 8 Z"
+       fill="#fef9c3" stroke="#ca8a04" stroke-width="2"/>
+     <path d="M26 68 l5 -8 l6 8 l7 -9 l6 9 l6 -8 l5 8 Z" fill="#fef9c3" stroke="#ca8a04" stroke-width="2" stroke-linejoin="round"/>
+     <ellipse cx="50" cy="46" rx="27" ry="25" fill="#86efac" stroke="#16a34a" stroke-width="2"/>
+     ${dinoEyes(40, 60, 42, 7.5)}
+     <circle cx="34" cy="52" r="4" fill="#f9a8d4" opacity=".7"/>
+     <circle cx="66" cy="52" r="4" fill="#f9a8d4" opacity=".7"/>
+     ${dinoSmile(56, 7)}`,
+    grad('dba', shade('#86efac', 24), shade('#86efac', -26))
+  ),
+};
+
+/* ============================================================
  * 拼图大图：把主题元素排布成一张有细节的场景（900x900）
  * ========================================================== */
 export function sceneArt({ palette = ['#5b8cff', '#6ee7ff'], items = [], seed = 7 } = {}) {
@@ -264,5 +409,132 @@ export function sceneArt({ palette = ['#5b8cff', '#6ee7ff'], items = [], seed = 
     ${grid}${deco}${art}
     <rect width="900" height="900" fill="url(#vig)"/>
     <rect x="6" y="6" width="888" height="888" rx="26" fill="none" stroke="#ffffff" stroke-width="8" opacity="0.35"/>
+  </svg>`;
+}
+
+/* ============================================================
+ * 小恐龙主题的拼图大图：火山 + 丛林 + 恐龙群（900x900）
+ * 手工构图，保证 3×3 / 4×4 切开后每块都有可辨认的内容。
+ * ========================================================== */
+export function dinoScene() {
+  const strip = (svg) => svg.replace(/<\/?svg[^>]*>/g, '');
+
+  const cloud = (x, y, s, o = .9) =>
+    `<g transform="translate(${x} ${y}) scale(${s})" opacity="${o}">
+       <ellipse cx="0" cy="0" rx="46" ry="26" fill="#ffffff"/>
+       <ellipse cx="-34" cy="8" rx="30" ry="18" fill="#ffffff"/>
+       <ellipse cx="36" cy="9" rx="32" ry="19" fill="#ffffff"/>
+       <ellipse cx="4" cy="-16" rx="26" ry="18" fill="#ffffff"/>
+     </g>`;
+
+  const palm = (x, y, s) =>
+    `<g transform="translate(${x} ${y}) scale(${s})">
+       <path d="M0 0 C-6 -40 8 -80 0 -120" stroke="#7c5a36" stroke-width="12" fill="none" stroke-linecap="round"/>
+       <g transform="translate(0 -120)">
+         <path d="M0 0 C-40 -8 -70 -2 -92 14 C-50 8 -22 12 0 0 Z" fill="#3fa458"/>
+         <path d="M0 0 C40 -8 70 -2 92 14 C50 8 22 12 0 0 Z" fill="#4bb866"/>
+         <path d="M0 0 C-18 -36 -40 -52 -66 -58 C-34 -40 -16 -22 0 0 Z" fill="#58c472"/>
+         <path d="M0 0 C18 -36 40 -52 66 -58 C34 -40 16 -22 0 0 Z" fill="#58c472"/>
+         <path d="M0 0 C0 -34 2 -58 10 -78 C6 -48 6 -22 0 0 Z" fill="#45b060"/>
+       </g>
+     </g>`;
+
+  const fern = (x, y, s, c = '#2f9e4f') =>
+    `<g transform="translate(${x} ${y}) scale(${s})" stroke="${c}" stroke-width="7" fill="none" stroke-linecap="round">
+       <path d="M0 0 C-2 -30 0 -52 4 -70"/><path d="M4 -70 C-14 -66 -28 -56 -40 -44 C-14 -52 -2 -58 4 -70"/>
+       <path d="M4 -70 C22 -66 36 -56 48 -44 C22 -52 10 -58 4 -70"/>
+       <path d="M4 -70 C-8 -82 -16 -92 -24 -98 C-8 -90 0 -80 4 -70"/>
+       <path d="M4 -70 C16 -82 24 -92 32 -98 C16 -90 8 -80 4 -70"/>
+     </g>`;
+
+  const grass = (x, y, c = '#3c9247') =>
+    `<path d="M${x} ${y} q-8 -16 -4 -28 M${x} ${y} q0 -20 2 -32 M${x} ${y} q8 -16 12 -26"
+       stroke="${c}" stroke-width="4" fill="none" stroke-linecap="round"/>`;
+
+  /* 一只完整小恐龙：小短腿 + 脑袋，feet 落在 groundY 上 */
+  const fig = (faceSvg, color, cx, groundY, s, flip = false, withLegs = true) => {
+    const inner = `${withLegs ? dinoLegs(color) : ''}${strip(faceSvg)}`;
+    const tx = cx - 50 * s, ty = groundY - 104 * s;
+    return `<g transform="translate(${tx.toFixed(1)} ${ty.toFixed(1)})${flip ? ' scale(-1 1) translate(-100 0)' : ''} scale(${s})">${inner}</g>`;
+  };
+
+  const dinos = [
+    fig(DINOS.trex(), '#4ade80', 622, 786, 2.25),
+    fig(DINOS.tric(), '#3b82f6', 214, 800, 1.7),
+    fig(DINOS.steg(), '#b46bff', 430, 826, 1.45),
+    fig(DINOS.raptor(), '#facc15', 770, 812, 1.15, false),
+    fig(DINOS.baby(), '#86efac', 104, 828, 1.2),
+  ].join('');
+
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 900">
+    <defs>
+      <linearGradient id="dsky" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#8fd6ff"/><stop offset=".55" stop-color="#c9f1e8"/><stop offset="1" stop-color="#eef8d8"/>
+      </linearGradient>
+      <radialGradient id="dsun" cx=".5" cy=".5" r=".5">
+        <stop offset="0" stop-color="#fff6c8"/><stop offset=".6" stop-color="#ffd86b"/><stop offset="1" stop-color="#ffb84d"/>
+      </radialGradient>
+      <linearGradient id="dground" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#7cc766"/><stop offset="1" stop-color="#4d9b44"/>
+      </linearGradient>
+    </defs>
+
+    <rect width="900" height="900" fill="url(#dsky)"/>
+
+    <!-- 太阳与光晕 -->
+    <circle cx="700" cy="150" r="150" fill="#ffd86b" opacity=".18"/>
+    <circle cx="700" cy="150" r="82" fill="url(#dsun)"/>
+
+    <!-- 云 -->
+    ${cloud(180, 120, 1.15)}
+    ${cloud(470, 74, .85, .75)}
+    ${cloud(330, 250, .7, .6)}
+    ${cloud(760, 330, .95, .8)}
+
+    <!-- 远山 -->
+    <ellipse cx="120" cy="560" rx="230" ry="120" fill="#9bd58a" opacity=".75"/>
+    <ellipse cx="700" cy="575" rx="280" ry="115" fill="#8fcc80" opacity=".7"/>
+
+    <!-- 火山 -->
+    <path d="M60 660 L250 300 L440 660 Z" fill="#7a6687"/>
+    <path d="M250 300 L300 420 L200 420 Z" fill="#fff" opacity=".55"/>
+    <path d="M250 300 L286 380 L214 380 Z" fill="#e8553f"/>
+    <path d="M238 380 q8 60 -2 120 M262 380 q14 70 22 130" stroke="#ff7a4f" stroke-width="9" fill="none" stroke-linecap="round" opacity=".9"/>
+    <circle cx="238" cy="262" r="16" fill="#ff8a5c" opacity=".5"/><circle cx="272" cy="246" r="10" fill="#ff8a5c" opacity=".4"/>
+    <circle cx="222" cy="232" r="7" fill="#ff8a5c" opacity=".35"/>
+
+    <!-- 地面 -->
+    <path d="M0 640 C160 612 300 648 460 636 C620 624 740 600 900 628 L900 900 L0 900 Z" fill="url(#dground)"/>
+    <path d="M0 640 C160 612 300 648 460 636 C620 624 740 600 900 628"
+          fill="none" stroke="#a7e083" stroke-width="10" opacity=".8"/>
+    <g fill="#3c8038" opacity=".5">
+      <circle cx="300" cy="760" r="5"/><circle cx="520" cy="830" r="4"/><circle cx="680" cy="860" r="5"/>
+      <circle cx="180" cy="860" r="4"/><circle cx="830" cy="760" r="4"/><circle cx="380" cy="720" r="3"/>
+    </g>
+
+    <!-- 植物 -->
+    ${palm(70, 668, 1.05)}
+    ${palm(842, 640, .85)}
+    ${fern(330, 700, 1.0)}
+    ${fern(560, 706, .8, '#379f52')}
+    ${fern(738, 700, .7)}
+    ${fern(40, 760, .75)}
+    ${grass(150, 770)}${grass(260, 820)}${grass(480, 770)}${grass(610, 830)}${grass(800, 830)}${grass(700, 730)}
+
+    <!-- 恐龙蛋 -->
+    <g fill="#fef3c7" stroke="#d6a543" stroke-width="2">
+      <ellipse cx="132" cy="788" rx="12" ry="16" transform="rotate(-14 132 788)"/>
+      <ellipse cx="158" cy="794" rx="10" ry="14"/>
+    </g>
+
+    <!-- 天上飞的翼龙 -->
+    ${fig(DINOS.ptero(), '#6ee7ff', 520, 268, 1.05, false, false)}
+
+    <!-- 地上的恐龙群 -->
+    ${dinos}
+
+    <!-- 前景蕨叶，增加拼图层次 -->
+    ${fern(880, 900, 1.5, '#2c8a47')}
+    ${fern(-30, 905, 1.5, '#2c8a47')}
   </svg>`;
 }

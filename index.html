@@ -20,8 +20,8 @@
         app.innerHTML = '<div style="padding:28px;font:14px/1.7 system-ui;color:#e6ecff">' +
           '<h2 style="margin:0 0 10px">页面没能启动</h2>' +
           '<p style="color:#8fa0c7;margin:0 0 14px">' + msg + '</p>' +
-          '<p style="color:#8fa0c7;margin:0">请用本地服务器打开（不要直接双击 index.html）：<br>' +
-          '<code style="color:#6ee7ff">python serve.py</code> 然后访问 <code style="color:#6ee7ff">http://127.0.0.1:8123/index.html</code></p></div>';
+          '<p style="color:#8fa0c7;margin:0">请用开发服务器打开（不要直接双击 index.html）：<br>' +
+          '<code style="color:#6ee7ff">npm run dev</code> 然后访问 <code style="color:#6ee7ff">http://127.0.0.1:8123/</code></p></div>';
       }
       window.addEventListener('error', function (e) {
         if (e && e.message && /Failed to (fetch|resolve)|module/i.test(e.message)) fail(e.message);

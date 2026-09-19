@@ -77,22 +77,18 @@ export default class PuzzleGame extends Game {
         this.blank = { r: pickOne.r, c: pickOne.c };
       }
     } else {
-      // 交换模式：随机排列（确保不是已完成）
+      // 交换模式：把每个图块（带着自己的固定画面）随机分配到格子上，确保不是已完成态
       const order = this.tiles.map((t) => t.id);
       do {
         for (let i = order.length - 1; i > 0; i--) {
           const j = randInt(0, i);
           [order[i], order[j]] = [order[j], order[i]];
         }
-      } while (order.every((id, i) => id === i));
+      } while (order.every((pos, i) => pos === i));
       this.tiles.forEach((t, i) => {
-        const id = order[i];
-        const src = this.tiles[id];
-        t.r = Math.floor(i / n); t.c = i % n;
-        t.imgId = id;
+        t.r = Math.floor(order[i] / n);
+        t.c = order[i] % n;
       });
-      // 用 imgId 承载显示图像，id 承载正确位置
-      this.tiles.forEach((t) => { t.imgId = t.imgId ?? t.id; });
     }
 
     this.board.innerHTML = '';
@@ -128,10 +124,13 @@ export default class PuzzleGame extends Game {
       node.style.height = `${sizePct}%`;
       node.style.left = `${t.c * sizePct}%`;
       node.style.top = `${t.r * sizePct}%`;
+      // 先刷新状态类，下面的色块样式才能读到最新的 is-ok
+      node.classList.toggle('is-hidden', !!t.hidden);
+      node.classList.toggle('is-ok', t.id === t.r * n + t.c);
+      node.classList.toggle('is-sel', this.selected === t);
       const img = this.imgIndexOf(t);
       if (this.forceNum) {
         // 数字华容道：纯色块 + 数字，不用图片
-        node.style.backgroundImage = 'none';
         node.style.background = node.classList.contains('is-ok')
           ? 'linear-gradient(135deg,#4ade80,#6ee7ff)'
           : 'linear-gradient(135deg,#5b8cff,#b46bff)';
@@ -140,14 +139,13 @@ export default class PuzzleGame extends Game {
         const ic = img % n;
         const px = n > 1 ? (ic / (n - 1)) * 100 : 0;
         const py = n > 1 ? (ir / (n - 1)) * 100 : 0;
-        node.style.backgroundImage = `url("${this.art}")`;
+        // 注意：background 简写必须在设置 backgroundImage 之前清空，
+        // 否则它会连同 background-image 等所有长属性一起抹掉。
         node.style.background = '';
+        node.style.backgroundImage = `url("${this.art}")`;
         node.style.backgroundSize = `${n * 100}% ${n * 100}%`;
         node.style.backgroundPosition = `${px}% ${py}%`;
       }
-      node.classList.toggle('is-hidden', !!t.hidden);
-      node.classList.toggle('is-ok', t.id === t.r * n + t.c);
-      node.classList.toggle('is-sel', this.selected === t);
       const num = node.querySelector('.pz-num');
       num.textContent = showNum ? String(img + 1) : '';
       num.classList.toggle('u-hide', !showNum);

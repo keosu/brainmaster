@@ -106,7 +106,22 @@ function shapesTheme() {
   };
 }
 
-const BUILTIN = [heroesTheme(), monstersTheme(), animalsTheme(), spaceTheme(), shapesTheme()];
+function dinosTheme() {
+  const keys = ['trex', 'bron', 'tric', 'steg', 'ptero', 'anky', 'para', 'spino', 'raptor', 'baby'];
+  const names = ['霸王龙', '腕龙', '三角龙', '剑龙', '翼龙', '甲龙', '副栉龙', '棘龙', '迅猛龙', '恐龙宝宝'];
+  const tints = ['#4ade80', '#2dd4bf', '#3b82f6', '#b46bff', '#6ee7ff', '#94a3b8', '#fb923c', '#f87171', '#facc15', '#86efac'];
+  const faces = keys.map((k, i) => ({
+    id: `dino-${k}`, name: names[i], svg: S.DINOS[k](), tint: tints[i],
+  }));
+  return {
+    id: 'dinos', name: '小恐龙乐园', emoji: '🦕', kind: 'svg',
+    palette: ['#4ade80', '#6ee7ff'],
+    faces,
+    art: () => S.dinoScene(),
+  };
+}
+
+const BUILTIN = [heroesTheme(), monstersTheme(), animalsTheme(), spaceTheme(), shapesTheme(), dinosTheme()];
 
 /* ---------------- 注册表 ---------------- */
 const registry = new Map(BUILTIN.map((t) => [t.id, t]));

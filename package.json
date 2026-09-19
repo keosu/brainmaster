@@ -5,7 +5,8 @@
   "description": "Brain Master · 脑力大师 —— 儿童益智游戏合集（Web + Android）",
   "type": "module",
   "scripts": {
-    "dev": "python serve.py 8123",
+    "dev": "vite",
+    "preview": "vite preview",
     "build": "node scripts/build-web.mjs",
     "cap:add": "npm run build && cap add android",
     "cap:sync": "npm run build && cap sync android",
@@ -24,6 +25,7 @@
   },
   "devDependencies": {
     "@capacitor/cli": "^8.0.0",
-    "esbuild": "^0.28.2"
+    "esbuild": "^0.28.2",
+    "vite": "^8.3.0"
   }
 }

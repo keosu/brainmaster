@@ -34,11 +34,16 @@ export function openSettings() {
   });
   const btnExport = el('button.btn.btn--sm', { text: '⬇️ 导出数据', onClick: () => doExport() });
   const btnImport = el('button.btn.btn--sm', { text: '⬆️ 导入数据', onClick: () => fileInput.click() });
+  const btnCopy = el('button.btn.btn--sm.btn--ghost', { text: '📋 复制存档文本', onClick: () => doCopy() });
 
   const body = el('div', {}, [
     el('p.settings__hint', { text: '关闭的游戏不会出现在首页和「每日训练」里。' }),
     list,
-    el('div.settings__data', {}, [btnExport, btnImport, fileInput]),
+    el('div.settings__data-title', { text: '数据备份与恢复' }),
+    el('div.settings__data', {}, [btnExport, btnImport, btnCopy, fileInput]),
+    el('p.settings__hint', {
+      text: '「导出数据」会把存档 JSON 文件下载到系统「下载」文件夹（文件名 brain-master-data-日期.json）；换机、重装或清理前先导出，之后点「导入数据」选回该文件即可恢复。若手机上没有出现下载文件，可用「复制存档文本」把 JSON 粘贴到备忘录保存。',
+    }),
     el('p.settings__ver', { text: `Brain Master · v${APP_VERSION}` }),
   ]);
 
@@ -63,6 +68,29 @@ function doExport() {
   a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
   toast('已导出存档数据');
+}
+
+/** 复制存档 JSON（部分手机 WebView 不支持 Blob 下载时的兜底方案） */
+async function doCopy() {
+  const text = save.exportString();
+  try {
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(text);
+    } else {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      ta.remove();
+    }
+    toast('存档文本已复制，可粘贴到备忘录保存');
+  } catch (err) {
+    console.warn(err);
+    toast('复制失败，请用「导出数据」');
+  }
 }
 
 function doImport(e) {

@@ -12,45 +12,29 @@ export function renderHome(content) {
   clear(content);
   const home = el('div.home');
 
-  /* ---------- Hero ---------- */
+  /* ---------- Hero（一行轻量状态条） ---------- */
   const power = save.brain.power;
   const lv = levelOf(power);
   const totalPlays = Object.values(save.all.plays).reduce((a, b) => a + b, 0);
   const trained = save.trainedToday.length;
 
-  const hero = el('section.hero', {}, [
-    el('div.hero__brand', {}, [
-      el('div.hero__logo', { text: '🧠' }),
-      el('div', {}, [
-        el('h1.hero__title', { text: 'BRAIN MASTER' }),
-        el('p.hero__slogan', { text: '每天 5 分钟，把小脑袋练得又快又灵光' }),
-      ]),
-    ]),
-    el('div.hero__stats', {}, [
-      statCard('脑力值', String(power), true),
-      statCard('当前称号', `${lv.emoji} ${lv.title}`),
-      statCard('今日训练', `${trained} / 3`),
-      statCard('累计挑战', `${totalPlays} 次`),
+  const heroTip = lv.next
+    ? `再获得 ${lv.remain} 点脑力可晋升「${lv.next.title}」`
+    : '已达最高称号，你就是光之智者！';
+  const dailyDone = trained >= 3;
+  const hero = el('section.hero', { title: heroTip }, [
+    el('div.hero__row', {}, [
+      el('span.hero__stat', { html: `🧠 脑力 <b>${power}</b>` }),
+      el('span.hero__stat', { text: `${lv.emoji} ${lv.title}` }),
+      el('span.hero__stat', { html: `🎯 今日 <b>${trained}/3</b>` }),
+      el('span.hero__stat', { html: `🏆 <b>${totalPlays}</b> 次` }),
+      el('button.btn.btn--pop.btn--sm.hero__daily', {
+        text: dailyDone ? '✅ 再来一组' : '🎯 开始训练',
+        title: dailyDone ? '今日训练已完成，可继续加练' : '随机 3 个小游戏，全部完成脑力翻倍',
+        onClick: () => { sound.play('go'); router.go('/training'); },
+      }),
     ]),
     el('div.levelbar', {}, [el('div.levelbar__fill', { style: { width: `${Math.round(lv.progress * 100)}%` } })]),
-    el('p', {
-      text: lv.next ? `再获得 ${lv.remain} 点脑力可晋升「${lv.next.title}」` : '已达最高称号，你就是光之智者！',
-      style: { fontSize: '12px', color: 'var(--ink-3)', marginTop: '10px' },
-    }),
-  ]);
-
-  /* ---------- 每日训练 ---------- */
-  const dailyDone = trained >= 3;
-  const daily = el('section.daily', {}, [
-    el('div.daily__icon', { text: dailyDone ? '✅' : '🎯' }),
-    el('div.daily__text', {}, [
-      el('div.daily__t', { text: dailyDone ? '今日训练已完成，明天再来！' : '每日训练 · 3 个小游戏' }),
-      el('div.daily__d', { text: dailyDone ? '也可以继续挑战任意项目，脑力值照常累加。' : '随机抽 3 个快速项目，一口气做完，脑力值翻倍奖励。' }),
-    ]),
-    el('button.btn.btn--pop', {
-      text: dailyDone ? '再来一组' : '开始训练',
-      onClick: () => { sound.play('go'); router.go('/training'); },
-    }),
   ]);
 
   /* ---------- 游戏列表 ---------- */
@@ -80,23 +64,16 @@ export function renderHome(content) {
   const gamesSection = el('section', {}, [
     el('div.section__head', {}, [
       el('h2.section__title', { text: '🎮 游戏大厅' }),
-      el('span.section__hint', { text: `${visibleCount} 个项目 · 点开即玩${themedGames().length ? ' · 换皮主题在支持的游戏里选' : ''}` }),
+      el('span.section__hint', { text: `${visibleCount} 个项目 · 点开即玩` }),
     ]),
     catRow,
     el('div', { style: { height: '12px' } }),
     grid,
   ]);
 
-  home.append(hero, daily, gamesSection);
+  home.append(hero, gamesSection);
   content.appendChild(home);
   return home;
-}
-
-function statCard(k, v, grad = false) {
-  return el('div.stat', {}, [
-    el('div.stat__k', { text: k }),
-    el(`div.stat__v${grad ? '.stat__v--grad' : ''}`, { text: v }),
-  ]);
 }
 
 function gameCard(g) {

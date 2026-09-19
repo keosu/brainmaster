@@ -3,15 +3,24 @@
  * 图案来自主题包（换成奥特曼等素材即自动生效）
  */
 import { Game, Timer } from '../../core/Game.js';
-import { el, randInt } from '../../core/utils.js';
+import { el, pick, randInt } from '../../core/utils.js';
 import { levelBar, themeBar, controlRow } from '../../ui/widgets.js';
 import { faceUrl } from '../../themes/index.js';
 import { save } from '../../core/storage.js';
 
+/* 异类的"变身"方式：差异要一眼能看出来，同时难度递增 */
 const DIFFS = {
-  easy: (n) => ({ transform: `rotate(${randInt(12, 20)}deg)` }),
-  normal: () => ({ transform: `scale(${randInt(80, 86) / 100})` }),
-  hard: () => ({ filter: `hue-rotate(${randInt(45, 85)}deg)`, transform: `scale(0.94)` }),
+  // 入门：歪着站
+  easy: () => [{ transform: `rotate(${randInt(20, 30)}deg)` }],
+  // 标准：明显小一圈
+  normal: () => [{ transform: `scale(${randInt(66, 74) / 100})` }],
+  // 困难：镜像 / 黑白 / 反色 / 变色，随机抽一种
+  hard: () => [pick([
+    { transform: 'scaleX(-1)' },
+    { filter: 'grayscale(1)' },
+    { filter: `hue-rotate(${randInt(100, 160)}deg)` },
+    { filter: 'invert(.92)' },
+  ])],
 };
 
 export default class OddGame extends Game {
@@ -60,14 +69,14 @@ export default class OddGame extends Game {
     const faceIndex = randInt(0, theme.faces.length - 1);
     const url = faceUrl(theme, faceIndex);
     const oddAt = randInt(0, this.count - 1);
-    const diff = (DIFFS[this.options.level] || DIFFS.normal)();
+    const [diff] = (DIFFS[this.options.level] || DIFFS.normal)();
 
     this.grid.innerHTML = '';
     for (let i = 0; i < this.count; i++) {
       const item = el('button.odd-item', { onClick: () => this.choose(i, item) });
       item.style.backgroundImage = `url("${url}")`;
       if (i === oddAt) Object.assign(item.style, diff);
-      item.classList.add('pop-in');
+      // 只做透明度入场：transform/filter 动画会盖掉异类自己的变身样式
       item.style.animationDelay = `${i * 24}ms`;
       this.grid.appendChild(item);
     }
