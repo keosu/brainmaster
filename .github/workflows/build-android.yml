@@ -35,17 +35,27 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
           cache: 'gradle'
-
+          
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
-
+      
       - name: Install SDK packages & accept licenses
         env:
           ANDROID_HOME: ${{ env.ANDROID_HOME }}
+          ANDROID_SDK_ROOT: ${{ env.ANDROID_SDK_ROOT }}
         run: |
+          set -euxo pipefail
+          export PATH="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$PATH"
+      
+          if [ ! -x "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" ]; then
+            echo "sdkmanager not found at $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager"
+            ls -R "$ANDROID_SDK_ROOT" || true
+            exit 1
+          fi
+      
           yes | sdkmanager --licenses
-          sdkmanager "platforms;android-36" "build-tools;36.0.0"
-
+          sdkmanager --install "platform-tools" "platforms;android-36" "build-tools;36.0.0"
+      
       - name: Point Gradle to Android SDK
         run: echo "sdk.dir=$ANDROID_HOME" > android/local.properties
 
