@@ -259,7 +259,44 @@ npm run android:apk      # cap sync + gradlew assembleDebug
 
 ## 六、可继续扩展的方向
 
-- 新增游戏：记忆矩阵、汉诺塔、舒尔特方格、24 点、连线记忆、看图找规律（照着上面的 3 步加即可）
+- 新增游戏：记忆矩阵、连线记忆、看图找规律、俄罗斯方块、华容道（照着上面的 3 步加即可；汉诺塔 / 舒尔特 / 24 点已实现）
 - 主题：奥特曼、汪汪队、恐龙、交通工具、汉字卡
 - 系统：家长报告（每周脑力曲线）、多语言、排行榜、音效包替换
 - 无障碍：键盘操作（部分已支持，如数独）、更大字号模式
+
+## 七、Git 版本管理与 GitHub Actions（自动出 APK）
+
+项目已初始化 Git 仓库，并附带一条 CI 流水线：每次 push 自动构建安卓 **Debug APK** 并上传为构建产物；
+打 `v*` tag 时还会自动发布到 GitHub Release。
+
+### 1. 本地提交
+```bash
+git add -A
+git commit -m "你的改动说明"
+git push origin main
+```
+
+### 2. CI 做了什么（`.github/workflows/build-android.yml`）
+1. 检出代码 → 装 Node 20 + JDK 17；
+2. 装 Android SDK（`platform-36` / `build-tools;36.0.0`）并接受协议；
+3. `npm ci` → `npm run build` 产出 `dist/`；
+4. `npx cap sync android` 把 Web 资源同步进原生工程；
+5. `./gradlew assembleDebug` 编译 Debug APK；
+6. 用 `actions/upload-artifact` 上传 APK；若是 `v*` tag，再用 `softprops/action-gh-release` 发布。
+
+### 3. 怎么拿到 APK
+- 普通 push：进仓库 **Actions → 对应任务 → Artifacts → `brain-master-debug-apk`** 下载；
+- 打 tag：`git tag v1.0.0 && git push origin v1.0.0`，去 **Releases** 下载。
+
+> CI 产出的是 **Debug** 包（可直接安装测试，无签名限制）。要上架商店需自行配置 Release 签名
+> （`keystore` + `android/app/build.gradle` 的 `signingConfigs` 块）。
+> 仓库已用 `.gitignore` / `.gitattributes` 管理：`node_modules`、`dist`、安卓编译缓存、出包与密钥均不入库；
+> 文本统一 **LF** 换行，保证 Linux runner 上的 `gradlew` 可正常执行。
+
+### 4. 一键发版示例
+```bash
+git tag v1.0.0
+git push origin v1.0.0     # CI 自动构建并把 APK 发布到 Release
+```
+
+> 注意：Capacitor 原生工程 `android/` 已提交进仓库，因此 CI 无需 `cap add`，直接 `cap sync` 即可。
