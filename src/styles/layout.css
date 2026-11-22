@@ -30,9 +30,9 @@
   align-items: center;
   gap: 12px;
   padding: calc(10px + var(--safe-t)) 16px 10px;
-  backdrop-filter: blur(14px);
-  background: linear-gradient(180deg, rgba(9, 13, 30, 0.92), rgba(9, 13, 30, 0.55));
-  border-bottom: 1px solid var(--border);
+  /* 必须不透明：半透明 + 模糊会把页面左上角的光晕透出来，看起来像一条灰带 */
+  background: #0a0e1f;
+  border-bottom: 1px solid rgba(132, 166, 255, 0.12);
 }
 .topbar__back {
   display: inline-flex; align-items: center; gap: 4px;

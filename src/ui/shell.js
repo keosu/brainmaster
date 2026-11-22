@@ -10,6 +10,8 @@ import { getGameMeta } from '../games/manifest.js';
 import { showModal, dismissTop, clearOverlays, toast } from './modal.js';
 import { openSettings } from './settings.js';
 import { iconSvg } from './logo.js';
+import { renderHonor } from './honor.js';
+import { evaluateAchievements } from '../core/honors.js';
 
 export const LOGO_URL = svgToDataUri(iconSvg({ bg: 'rounded', scale: 0.9 }));
 
@@ -59,6 +61,7 @@ export function boot(app) {
   btnSound.classList.toggle('is-off', !save.settings.sound);
 
   const btnSettings = iconBtn('⚙️', '设置', () => openSettings({ onChange: syncSettings }));
+  const btnHonor = iconBtn('🏆', '荣誉殿堂', () => router.go('/honor'));
 
   function syncSettings() {
     btnSound.textContent = save.settings.sound ? '🔊' : '🔇';
@@ -68,7 +71,7 @@ export function boot(app) {
   const topbar = el('header.topbar', {}, [
     back, brand, titleBox,
     el('div.topbar__spacer'),
-    el('div.topbar__actions', {}, [btnHelp, btnFull, btnSound, btnSettings]),
+    el('div.topbar__actions', {}, [btnHelp, btnHonor, btnFull, btnSound, btnSettings]),
   ]);
 
   const content = el('div.shell__content');
@@ -85,6 +88,7 @@ export function boot(app) {
     brand.classList.toggle('u-hide', !home);
     titleBox.classList.toggle('u-hide', home);
     btnHelp.classList.toggle('u-hide', home || !opts.help);
+    btnHonor.classList.toggle('u-hide', !home);
     shell.classList.toggle('is-home', home);
     if (!home) {
       titleBox.children[0].textContent = opts.title || '';
@@ -100,6 +104,17 @@ export function boot(app) {
     setTopbar('home');
     onHome = true;
     renderHome(content);
+    content.scrollTo?.({ top: 0 });
+  }
+
+  /* ---------- 荣誉殿堂 ---------- */
+  function showHonorPage() {
+    runner.unload();
+    clearOverlays();
+    clear(content);
+    setTopbar('page', { title: '🏆 荣誉殿堂', sub: '称号 · 打卡 · 成就' });
+    onHome = false;
+    renderHonor(content);
     content.scrollTo?.({ top: 0 });
   }
 
@@ -177,15 +192,23 @@ export function boot(app) {
     const bonus = 20 + starsTotal * 6;
     const power = save.addPower(bonus);
     const lv = levelOf(power);
+    save.addTraining();
+    const unlocked = evaluateAchievements();
     clearOverlays();
     showModal({
       emoji: '🏅',
       title: '今日训练完成！',
-      sub: `三个项目全部完成，额外奖励脑力 ${bonus} 点。当前称号：${lv.emoji} ${lv.title}`,
-      body: el('div.modal__stats', {}, trainState.scores.map((s) => el('div.modal__stat', {}, [
-        el('b', { text: `${s.score}${s.unit || ''}` }),
-        el('span', { text: `${s.emoji} ${s.name} ${'⭐'.repeat(s.stars || 0)}` }),
-      ]))),
+      sub: `三个项目全部完成，额外奖励脑力 ${bonus} 点。当前称号：${lv.emoji} ${lv.title} · 连续打卡 ${save.streak} 天`,
+      body: el('div', {}, [
+        el('div.modal__stats', {}, trainState.scores.map((s) => el('div.modal__stat', {}, [
+          el('b', { text: `${s.score}${s.unit || ''}` }),
+          el('span', { text: `${s.emoji} ${s.name} ${'⭐'.repeat(s.stars || 0)}` }),
+        ]))),
+        unlocked.length ? el('div.modal__honors', {}, unlocked.map((a) => el('div.honor-pop', {}, [
+          el('span.honor-pop__ico', { text: a.emoji }),
+          el('span', {}, [el('small', { text: '解锁成就' }), el('b', { text: a.name })]),
+        ]))) : null,
+      ]),
       actions: [
         { label: '再来一组', primary: true, onClick: () => router.go('/training') },
         { label: '返回首页', onClick: () => router.home() },
@@ -214,6 +237,7 @@ export function boot(app) {
     if (!root) return showHome();
     if (root === 'game') return showGame(param, query);
     if (root === 'training') return showTraining();
+    if (root === 'honor') return showHonorPage();
     showHome();
   });
 

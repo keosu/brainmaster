@@ -1,26 +1,34 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
   <defs>
     <linearGradient id="bmBg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#4f8bff"/>
-      <stop offset="1" stop-color="#8a55f5"/>
+      <stop offset="0" stop-color="#3f7bff"/>
+      <stop offset="1" stop-color="#7c4dff"/>
     </linearGradient>
-    <radialGradient id="bmGlow" cx=".28" cy=".18" r=".8">
-      <stop offset="0" stop-color="#fff" stop-opacity=".32"/>
-      <stop offset=".55" stop-color="#fff" stop-opacity="0"/>
+    <radialGradient id="bmGlow" cx=".5" cy=".5" r=".5">
+      <stop offset="0" stop-color="#9ff3ff" stop-opacity=".55"/>
+      <stop offset="1" stop-color="#9ff3ff" stop-opacity="0"/>
     </radialGradient>
-    <linearGradient id="bmPiece" x1="0" y1="0" x2="0" y2="1">
+    <linearGradient id="bmBrain" gradientUnits="userSpaceOnUse" x1="0" y1="110" x2="0" y2="410">
       <stop offset="0" stop-color="#ffffff"/>
-      <stop offset="1" stop-color="#e6ebff"/>
+      <stop offset="1" stop-color="#dde5ff"/>
     </linearGradient>
-    <linearGradient id="bmSpark" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#ffd76a"/>
-      <stop offset="1" stop-color="#ff9a3d"/>
-    </linearGradient>
+    <clipPath id="bmL"><rect x="0" y="0" width="249" height="512"/></clipPath>
+    <clipPath id="bmR"><rect x="263" y="0" width="249" height="512"/></clipPath>
     <filter id="bmShadow" x="-30%" y="-30%" width="160%" height="160%">
-      <feDropShadow dx="0" dy="14" stdDeviation="16" flood-color="#1a1060" flood-opacity=".35"/>
+      <feDropShadow dx="0" dy="12" stdDeviation="14" flood-color="#160a5a" flood-opacity=".35"/>
     </filter>
-  </defs><rect width="512" height="512" rx="114" fill="url(#bmBg)"/><rect width="512" height="512" rx="114" fill="url(#bmGlow)"/><g transform="translate(256 256) scale(1.161) translate(-256 -256)"><g transform="translate(-28 8)">
-    <path d="M180 176 H230 A34 34 0 1 1 282 176 H332 Q356 176 356 200 V250 A34 34 0 1 1 356 302 V352 Q356 376 332 376 H180 Q156 376 156 352 V302 A30 30 0 1 0 156 250 V200 Q156 176 180 176 Z" fill="url(#bmPiece)" filter="url(#bmShadow)"/>
-    <path d="M256 226 Q268 264 306 276 Q268 288 256 326 Q244 288 206 276 Q244 264 256 226Z" fill="url(#bmSpark)"/>
-    <path d="M310 207 Q313.6 218.4 325 222 Q313.6 225.6 310 237 Q306.4 225.6 295 222 Q306.4 218.4 310 207Z" fill="#ffc24d"/>
-  </g></g></svg>
+  </defs><rect width="512" height="512" rx="114" fill="url(#bmBg)"/><g transform="translate(256 256) scale(0.963) translate(-256 -257)">
+    <circle cx="256" cy="257" r="210" fill="url(#bmGlow)"/>
+    <g filter="url(#bmShadow)">
+      <g clip-path="url(#bmL)" fill="url(#bmBrain)"><circle cx="200" cy="172" r="62"/><circle cx="148" cy="224" r="60"/><circle cx="140" cy="298" r="58"/><circle cx="190" cy="350" r="56"/><circle cx="226" cy="262" r="82"/></g>
+      <g clip-path="url(#bmR)" fill="url(#bmBrain)"><circle cx="312" cy="172" r="62"/><circle cx="364" cy="224" r="60"/><circle cx="372" cy="298" r="58"/><circle cx="322" cy="350" r="56"/><circle cx="286" cy="262" r="82"/></g>
+    </g>
+    <g clip-path="url(#bmL)" fill="none" stroke="#7d8cff" stroke-width="12" stroke-linecap="round">
+      <path d="M156 182 q15 -13 30 0 t30 0"/><path d="M112 238 q16 -14 32 0 t32 0 t32 0"/><path d="M110 298 q16 14 32 0 t32 0 t32 0"/><path d="M160 352 q15 -13 30 0 t30 0"/>
+    </g>
+    <g fill="none" stroke="#5a63f0" stroke-width="11" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M263 186 H316 L344 158"/><path d="M263 236 H376"/><path d="M300 236 V286 H338"/><path d="M263 326 H310 L340 356"/>
+    </g>
+    <g>
+      <circle cx="344" cy="158" r="14" fill="#5a63f0"/><circle cx="344" cy="158" r="6" fill="#9ff3ff"/><circle cx="376" cy="236" r="14" fill="#5a63f0"/><circle cx="376" cy="236" r="6" fill="#9ff3ff"/><circle cx="338" cy="286" r="14" fill="#5a63f0"/><circle cx="338" cy="286" r="6" fill="#9ff3ff"/><circle cx="340" cy="356" r="14" fill="#5a63f0"/><circle cx="340" cy="356" r="6" fill="#9ff3ff"/>
+    </g></g></svg>

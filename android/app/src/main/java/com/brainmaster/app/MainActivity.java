@@ -42,6 +42,11 @@ public class MainActivity extends BridgeActivity {
 
     private void hideSystemBars() {
         Window window = getWindow();
+        // 刘海 / 系统栏让出的边距区域露出的是窗口底色，统一成页面的深色，避免出现灰条
+        window.getDecorView().setBackgroundColor(0xFF0A0E1F);
+        if (getBridge() != null && getBridge().getWebView() != null) {
+            getBridge().getWebView().setBackgroundColor(0xFF0A0E1F);
+        }
         WindowInsetsControllerCompat controller = WindowCompat.getInsetsController(window, window.getDecorView());
         controller.setSystemBarsBehavior(WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
         controller.hide(WindowInsetsCompat.Type.systemBars());

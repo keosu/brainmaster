@@ -61,10 +61,10 @@ html, body {
 
 body {
   background:
-    radial-gradient(900px 620px at 10% -8%, rgba(110, 231, 255, 0.22), transparent 62%),
-    radial-gradient(820px 560px at 104% 6%, rgba(180, 107, 255, 0.2), transparent 62%),
-    radial-gradient(760px 620px at 50% 118%, rgba(91, 140, 255, 0.16), transparent 62%),
-    linear-gradient(180deg, #05091a, #0a1130 60%, #080d20);
+    radial-gradient(900px 620px at 10% 18%, rgba(110, 231, 255, 0.12), transparent 62%),
+    radial-gradient(820px 560px at 100% 30%, rgba(180, 107, 255, 0.12), transparent 62%),
+    radial-gradient(760px 620px at 50% 118%, rgba(91, 140, 255, 0.14), transparent 62%),
+    #0a0e1f;
   background-attachment: fixed;
 }
 

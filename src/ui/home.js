@@ -22,17 +22,20 @@ export function renderHome(content) {
     ? `再获得 ${lv.remain} 点脑力可晋升「${lv.next.title}」`
     : '已达最高称号，你就是光之智者！';
   const dailyDone = trained >= 3;
+  const openHonor = () => { sound.play('tap'); router.go('/honor'); };
   const hero = el('section.hero', { title: heroTip }, [
-    el('div.hero__badge', { text: lv.emoji }),
-    el('div.hero__info', {}, [
+    el('div.hero__badge', { text: lv.emoji, onClick: openHonor }),
+    el('div.hero__info', { onClick: openHonor }, [
       el('div.hero__title', {}, [
         el('b', { text: lv.title }),
         el('span.hero__lv', { text: `Lv.${lv.lv}` }),
+        el('span.hero__more', { text: '荣誉殿堂 ›' }),
       ]),
       el('div.levelbar', {}, [el('div.levelbar__fill', { style: { width: `${Math.round(lv.progress * 100)}%` } })]),
       el('div.hero__meta', {}, [
-        el('span', { html: `🧠 脑力 <b>${power}</b>` }),
+        el('span', { html: `🧠 <b>${power}</b>` }),
         el('span', { html: `今日 <b>${Math.min(trained, 99)}</b> 项` }),
+        el('span', { html: `🔥 <b>${save.streak}</b> 天`, title: '连续打卡天数' }),
         el('span.hero__plays', { html: `共 <b>${totalPlays}</b> 次` }),
       ]),
     ]),

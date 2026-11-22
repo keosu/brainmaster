@@ -73,13 +73,25 @@ export function showResult(r) {
       : null,
     r.newBest ? el('div.modal__newbest', { text: '🎉 新纪录！' }) : null,
     r.bestText ? el('div.modal__sub', { text: r.bestText }) : null,
+    r.levelUp || r.badges?.length
+      ? el('div.modal__honors', {}, [
+        r.levelUp ? el('div.honor-pop.honor-pop--lv', {}, [
+          el('span.honor-pop__ico', { text: r.levelUp.emoji }),
+          el('span', {}, [el('small', { text: '晋升新称号' }), el('b', { text: r.levelUp.title })]),
+        ]) : null,
+        ...(r.badges || []).map((a) => el('div.honor-pop', {}, [
+          el('span.honor-pop__ico', { text: a.emoji }),
+          el('span', {}, [el('small', { text: '解锁成就' }), el('b', { text: a.name })]),
+        ])),
+      ])
+      : null,
     dismissable ? el('div.modal__hint', { text: '点击空白处的任意位置，可以回到刚才的画面' }) : null,
   ]);
 
   if (r.speak) voice.speak(r.speak);
   if (!r.quiet) {
     sound.play(stars >= 3 ? 'win' : stars >= 1 ? 'great' : 'lose');
-    if (stars >= 3 || r.newBest) confetti();
+    if (stars >= 3 || r.newBest || r.levelUp || r.badges?.length) confetti();
   }
 
   return showModal({

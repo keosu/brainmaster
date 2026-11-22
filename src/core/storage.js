@@ -20,11 +20,23 @@ const DEFAULT = {
     power: 0,     // 脑力值
     day: null,    // 最近训练日
     streak: 0,    // 连续天数
+    bestStreak: 0, // 历史最长连续天数
     trained: [],  // 今日已完成训练的游戏 id
   },
   best: {},       // { [gameId]: { score, meta, at } }
   plays: {},      // { [gameId]: 次数 }
   history: [],    // 最近 30 条记录
+  days: {},       // 打卡记录 { 'YYYY-MM-DD': { n: 局数, s: 星数 } }
+  stats: {
+    stars: 0,        // 累计星星
+    catStars: {},    // { 分类: 星星数 }
+    bestStars: {},   // { [gameId]: 单局最高星级 }
+    threeStars: 0,   // 三星局数
+    records: 0,      // 刷新个人纪录次数
+    trainings: 0,    // 完成每日训练次数
+    feats: {},       // 特殊挑战 { featId: 时间戳 }
+  },
+  achievements: {}, // 已解锁成就 { id: 时间戳 }
 };
 
 let cache = null;
@@ -107,12 +119,62 @@ export const save = {
       s.brain.streak = s.brain.day === yesterdayKey() ? s.brain.streak + 1 : 1;
       s.brain.day = today;
       s.brain.trained = [];
+      s.brain.bestStreak = Math.max(s.brain.bestStreak || 0, s.brain.streak);
     }
     if (!s.brain.trained.includes(gameId)) s.brain.trained.push(gameId);
     write();
     return s.brain;
   },
   get trainedToday() { const b = read().brain; return b.day === todayKey() ? b.trained : []; },
+
+  /** 连续打卡天数：最近一次打卡不是今天或昨天就算断了 */
+  get streak() {
+    const b = read().brain;
+    return b.day === todayKey() || b.day === yesterdayKey() ? b.streak : 0;
+  },
+
+  /* ---- 荣誉统计 ---- */
+  /** 每局结算时记录：打卡日、星星、三星、刷新纪录 */
+  recordResult({ gameId, category, stars = 0, newRecord = false }) {
+    const s = read();
+    const day = todayKey();
+    const d = s.days[day] || (s.days[day] = { n: 0, s: 0 });
+    d.n += 1;
+    d.s += stars;
+    const keys = Object.keys(s.days);
+    if (keys.length > 800) keys.sort().slice(0, keys.length - 800).forEach((k) => delete s.days[k]);
+    const st = s.stats;
+    st.stars += stars;
+    if (category) st.catStars[category] = (st.catStars[category] || 0) + stars;
+    st.bestStars[gameId] = Math.max(st.bestStars[gameId] || 0, stars);
+    if (stars >= 3) st.threeStars += 1;
+    if (newRecord) st.records += 1;
+    write();
+  },
+  addFeats(ids) {
+    const s = read();
+    let added = false;
+    ids.forEach((id) => { if (!s.stats.feats[id]) { s.stats.feats[id] = Date.now(); added = true; } });
+    if (added) write();
+  },
+  addTraining() {
+    read().stats.trainings += 1;
+    write();
+  },
+  seedDay(day, entry) {
+    const s = read();
+    if (!s.days[day]) { s.days[day] = entry; write(); }
+  },
+  get stats() { return read().stats; },
+  get days() { return read().days; },
+  get achievements() { return read().achievements; },
+  unlockAchievement(id) {
+    const s = read();
+    if (s.achievements[id]) return false;
+    s.achievements[id] = Date.now();
+    write();
+    return true;
+  },
 
   /* ---- 历史 ---- */
   pushHistory(entry) {
@@ -162,9 +224,12 @@ export const LEVELS = [
   { lv: 4, need: 320, title: '逻辑小侦探', emoji: '🔍' },
   { lv: 5, need: 560, title: '闪电反应王', emoji: '⚡' },
   { lv: 6, need: 900, title: '计算小超人', emoji: '🚀' },
-  { lv: 7, need: 1400, title: '策略指挥官', emoji: '♟️' },
-  { lv: 8, need: 2100, title: '脑力宗师', emoji: '👑' },
-  { lv: 9, need: 3200, title: '光之智者', emoji: '✨' },
+  { lv: 7, need: 1400, title: '空间魔术师', emoji: '🎩' },
+  { lv: 8, need: 2000, title: '策略指挥官', emoji: '♟️' },
+  { lv: 9, need: 2800, title: '智慧小博士', emoji: '🎓' },
+  { lv: 10, need: 3800, title: '脑力宗师', emoji: '👑' },
+  { lv: 11, need: 5000, title: '光之智者', emoji: '✨' },
+  { lv: 12, need: 6500, title: '传奇大脑', emoji: '🏆' },
 ];
 
 export function levelOf(power) {
@@ -182,10 +247,10 @@ export function levelOf(power) {
 }
 
 /** 按本地时区取日期，避免 UTC 跨日导致"今日训练"提前清零 */
-function localDay(d) {
+export function localDay(d) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
-function todayKey() { return localDay(new Date()); }
+export function todayKey() { return localDay(new Date()); }
 function yesterdayKey() {
   const d = new Date();
   d.setDate(d.getDate() - 1);

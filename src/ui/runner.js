@@ -9,7 +9,8 @@
  */
 import { el, clear } from '../core/utils.js';
 import { getGameMeta } from '../games/manifest.js';
-import { save } from '../core/storage.js';
+import { save, levelOf } from '../core/storage.js';
+import { detectFeats, evaluateAchievements } from '../core/honors.js';
 import { sound, voice } from '../core/audio.js';
 import { getTheme } from '../themes/index.js';
 import { Hud } from './hud.js';
@@ -303,9 +304,15 @@ export class Runner {
     save.addPlay(meta.id);
     save.markTrained(meta.id);
     save.pushHistory({ game: meta.id, score, level: query.level });
+    const level = query.level || meta.levels?.[0]?.id;
+    save.recordResult({ gameId: meta.id, category: meta.category, stars, newRecord: isBest && prev != null });
+    save.addFeats(detectFeats({ id: meta.id, level, stars, score, meta: result.meta, noRecord: result.noRecord }));
 
+    const before = levelOf(save.brain.power);
     const gained = Math.max(2, Math.round((result.power ?? (4 + stars * 4)) * (isBest ? 1.4 : 1)));
     const power = save.addPower(gained);
+    const after = levelOf(power);
+    const unlocked = evaluateAchievements();
     c.onScore?.({ id: meta.id, score, stars, isBest });
 
     const bestText = mode === 'min'
@@ -331,7 +338,9 @@ export class Runner {
       ],
       newBest: isBest && prev != null,
       bestText: prev != null ? bestText : '',
-      speak: result.speak,
+      levelUp: after.lv > before.lv ? after : null,
+      badges: unlocked,
+      speak: after.lv > before.lv ? `${result.speak || ''}，晋升${after.title}` : result.speak,
       actions,
       dismissable: !onFinish,
       onClose: () => this._peekResult(),

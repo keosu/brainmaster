@@ -1,54 +1,67 @@
 /**
- * 品牌图标：渐变底 + 白色拼图块 + 金色闪光（512 坐标系）。
+ * 品牌图标：电路大脑（512 坐标系）。
+ * 左半脑是柔和的脑回褶皱，右半脑是从中缝延伸出去的电路走线 —— 生物脑 + 科技感。
  * 纯字符串、无 DOM 依赖 —— 应用内 Logo 与 scripts/gen-icons.mjs 共用这一份源。
  */
 
-/** 拼图块轮廓：上、右各一个凸起，左侧一个凹口；外接框中心约在 (284, 248) */
-const PIECE = [
-  'M180 176 H230',
-  'A34 34 0 1 1 282 176',
-  'H332 Q356 176 356 200 V250',
-  'A34 34 0 1 1 356 302',
-  'V352 Q356 376 332 376 H180 Q156 376 156 352 V302',
-  'A30 30 0 1 0 156 250',
-  'V200 Q156 176 180 176 Z',
-].join(' ');
+/** 半脑轮廓由几个圆叠出脑叶的起伏感，右半边镜像 */
+const LOBES = [[200, 172, 62], [148, 224, 60], [140, 298, 58], [190, 350, 56], [226, 262, 82]];
+const lobes = (mirror) => LOBES.map(([x, y, r]) => `<circle cx="${mirror ? 512 - x : x}" cy="${y}" r="${r}"/>`).join('');
 
-function sparkle(cx, cy, r, fill) {
-  const k = r * 0.24;
-  return `<path d="M${cx} ${cy - r} Q${cx + k} ${cy - k} ${cx + r} ${cy} Q${cx + k} ${cy + k} ${cx} ${cy + r} Q${cx - k} ${cy + k} ${cx - r} ${cy} Q${cx - k} ${cy - k} ${cx} ${cy - r}Z" fill="${fill}"/>`;
-}
+const FOLDS = [
+  'M156 182 q15 -13 30 0 t30 0',
+  'M112 238 q16 -14 32 0 t32 0 t32 0',
+  'M110 298 q16 14 32 0 t32 0 t32 0',
+  'M160 352 q15 -13 30 0 t30 0',
+];
+
+const TRACES = [
+  { d: 'M263 186 H316 L344 158', node: [344, 158] },
+  { d: 'M263 236 H376', node: [376, 236] },
+  { d: 'M300 236 V286 H338', node: [338, 286] },
+  { d: 'M263 326 H310 L340 356', node: [340, 356] },
+  { d: 'M338 286 L384 286', node: [384, 300] , skip: true },
+];
 
 const DEFS = `
   <defs>
     <linearGradient id="bmBg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#4f8bff"/>
-      <stop offset="1" stop-color="#8a55f5"/>
+      <stop offset="0" stop-color="#3f7bff"/>
+      <stop offset="1" stop-color="#7c4dff"/>
     </linearGradient>
-    <radialGradient id="bmGlow" cx=".28" cy=".18" r=".8">
-      <stop offset="0" stop-color="#fff" stop-opacity=".32"/>
-      <stop offset=".55" stop-color="#fff" stop-opacity="0"/>
+    <radialGradient id="bmGlow" cx=".5" cy=".5" r=".5">
+      <stop offset="0" stop-color="#9ff3ff" stop-opacity=".55"/>
+      <stop offset="1" stop-color="#9ff3ff" stop-opacity="0"/>
     </radialGradient>
-    <linearGradient id="bmPiece" x1="0" y1="0" x2="0" y2="1">
+    <linearGradient id="bmBrain" gradientUnits="userSpaceOnUse" x1="0" y1="110" x2="0" y2="410">
       <stop offset="0" stop-color="#ffffff"/>
-      <stop offset="1" stop-color="#e6ebff"/>
+      <stop offset="1" stop-color="#dde5ff"/>
     </linearGradient>
-    <linearGradient id="bmSpark" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#ffd76a"/>
-      <stop offset="1" stop-color="#ff9a3d"/>
-    </linearGradient>
+    <clipPath id="bmL"><rect x="0" y="0" width="249" height="512"/></clipPath>
+    <clipPath id="bmR"><rect x="263" y="0" width="249" height="512"/></clipPath>
     <filter id="bmShadow" x="-30%" y="-30%" width="160%" height="160%">
-      <feDropShadow dx="0" dy="14" stdDeviation="16" flood-color="#1a1060" flood-opacity=".35"/>
+      <feDropShadow dx="0" dy="12" stdDeviation="14" flood-color="#160a5a" flood-opacity=".35"/>
     </filter>
   </defs>`;
 
-/** 图标主体（不含背景） */
-export function mark() {
-  return `<g transform="translate(-28 8)">
-    <path d="${PIECE}" fill="url(#bmPiece)" filter="url(#bmShadow)"/>
-    ${sparkle(256, 276, 50, 'url(#bmSpark)')}
-    ${sparkle(310, 222, 15, '#ffc24d')}
-  </g>`;
+/** 图标主体（不含背景），中心约在 (256, 257) */
+export function mark({ glow = true } = {}) {
+  const traces = TRACES.filter((t) => !t.skip);
+  return `
+    ${glow ? '<circle cx="256" cy="257" r="210" fill="url(#bmGlow)"/>' : ''}
+    <g filter="url(#bmShadow)">
+      <g clip-path="url(#bmL)" fill="url(#bmBrain)">${lobes(false)}</g>
+      <g clip-path="url(#bmR)" fill="url(#bmBrain)">${lobes(true)}</g>
+    </g>
+    <g clip-path="url(#bmL)" fill="none" stroke="#7d8cff" stroke-width="12" stroke-linecap="round">
+      ${FOLDS.map((d) => `<path d="${d}"/>`).join('')}
+    </g>
+    <g fill="none" stroke="#5a63f0" stroke-width="11" stroke-linecap="round" stroke-linejoin="round">
+      ${traces.map((t) => `<path d="${t.d}"/>`).join('')}
+    </g>
+    <g>
+      ${traces.map((t) => `<circle cx="${t.node[0]}" cy="${t.node[1]}" r="14" fill="#5a63f0"/><circle cx="${t.node[0]}" cy="${t.node[1]}" r="6" fill="#9ff3ff"/>`).join('')}
+    </g>`;
 }
 
 /**
@@ -59,11 +72,11 @@ export function mark() {
  */
 export function iconSvg({ bg = 'rounded', scale = 0.86, size = 512 } = {}) {
   let back = '';
-  if (bg === 'rounded') back = '<rect width="512" height="512" rx="114" fill="url(#bmBg)"/><rect width="512" height="512" rx="114" fill="url(#bmGlow)"/>';
-  else if (bg === 'square') back = '<rect width="512" height="512" fill="url(#bmBg)"/><rect width="512" height="512" fill="url(#bmGlow)"/>';
-  else if (bg === 'circle') back = '<circle cx="256" cy="256" r="256" fill="url(#bmBg)"/><circle cx="256" cy="256" r="256" fill="url(#bmGlow)"/>';
-  const s = (scale * 1.35).toFixed(3);
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 512 512">${DEFS}${back}<g transform="translate(256 256) scale(${s}) translate(-256 -256)">${mark()}</g></svg>`;
+  if (bg === 'rounded') back = '<rect width="512" height="512" rx="114" fill="url(#bmBg)"/>';
+  else if (bg === 'square') back = '<rect width="512" height="512" fill="url(#bmBg)"/>';
+  else if (bg === 'circle') back = '<circle cx="256" cy="256" r="256" fill="url(#bmBg)"/>';
+  const s = (scale * 1.12).toFixed(3);
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 512 512">${DEFS}${back}<g transform="translate(256 256) scale(${s}) translate(-256 -257)">${mark({ glow: bg !== 'none' })}</g></svg>`;
 }
 
 /** 安卓开屏图：深色底 + 居中图标 */

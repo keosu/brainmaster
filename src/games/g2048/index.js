@@ -250,6 +250,7 @@ export default class G2048Game extends Game {
       score: this.score,
       mode: 'max',
       stars,
+      meta: { max },
       title: max >= this.goal ? `成功合成 ${this.goal}！` : '没有空位啦',
       message: `最大方块 ${max} · 共 ${this.moves} 步`,
       speak: `得分 ${this.score}，最大方块 ${max}`,
