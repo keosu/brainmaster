@@ -65,6 +65,30 @@ export class Runner {
     return !!document.querySelector('#overlay-root .overlay');
   }
 
+  /** 游戏已开始且还没结算（此时离开需要确认） */
+  get inProgress() {
+    const c = this.current;
+    return !!(c && c.started && !c.finished);
+  }
+
+  /** 离开前确认：弹窗期间暂停计时，选择继续则恢复 */
+  confirmLeave(onLeave) {
+    const c = this.current;
+    if (!c) { onLeave(); return; }
+    c.game._suspend();
+    const stay = () => { if (this.current === c) c.game._resume(); };
+    showModal({
+      emoji: '🤔',
+      title: '要离开这局游戏吗？',
+      sub: '这一局还没完成，离开后本局进度不会保存',
+      actions: [
+        { label: '继续游戏', primary: true, onClick: stay },
+        { label: '离开', onClick: onLeave },
+      ],
+      onClose: stay,
+    });
+  }
+
   /** 横屏时把棋盘以外的元素挪到侧栏，竖屏时放回原位 */
   arrange() {
     const c = this.current;
@@ -267,6 +291,7 @@ export class Runner {
   _finish(result, { meta, query, onFinish }) {
     const c = this.current;
     if (!c) return;
+    c.finished = true;
     const mode = result.mode || meta.scoreMode || 'max';
     const score = Number(result.score ?? 0);
     const stars = result.stars ?? 0;

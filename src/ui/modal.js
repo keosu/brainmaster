@@ -13,9 +13,9 @@ export function closeModal() {
  * 通用弹窗
  * @returns {{close:Function, node:HTMLElement}}
  */
-export function showModal({ title, sub, emoji, body, actions = [], dismissable = true, onClose }) {
+export function showModal({ title, sub, emoji, body, actions = [], dismissable = true, onClose, className = '' }) {
   closeModal();
-  const node = el('div.modal');
+  const node = el('div.modal', { class: className });
   const parts = [];
   if (emoji) parts.push(el('div.modal__emoji', { text: emoji }));
   if (title) parts.push(el('div.modal__title', { text: title }));

@@ -99,16 +99,38 @@
   gap: 14px;
 }
 
-/* Hero：一行轻量状态条（关键数据 + 每日训练） */
+/* Hero：称号徽章 + 等级进度 + 每日训练按钮，三栏网格，任何宽度都不会挤掉按钮 */
 .hero {
   position: relative;
   overflow: hidden;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
   border-radius: var(--r-lg);
-  padding: 10px 16px 10px;
+  padding: 12px 16px;
   background: linear-gradient(135deg, rgba(110, 231, 255, 0.12), rgba(180, 107, 255, 0.12));
   border: 1px solid var(--border);
   box-shadow: var(--shadow-2);
 }
+.hero > * { position: relative; z-index: 1; }
+.hero__badge {
+  width: 52px; height: 52px;
+  display: grid; place-items: center;
+  border-radius: 16px;
+  font-size: 28px;
+  background: rgba(8, 12, 28, .45);
+  border: 1px solid var(--border-strong);
+}
+.hero__info { min-width: 0; }
+.hero__title { display: flex; align-items: baseline; gap: 8px; white-space: nowrap; }
+.hero__title b { font-size: 16px; font-weight: 900; overflow: hidden; text-overflow: ellipsis; }
+.hero__lv { font-size: 11px; font-weight: 800; color: var(--c-cyan); }
+.hero__info .levelbar { margin-top: 7px; }
+.hero__meta { display: flex; gap: 12px; margin-top: 6px; font-size: 12px; color: var(--ink-3); white-space: nowrap; overflow: hidden; }
+.hero__meta b { color: var(--ink); font-weight: 800; }
+.hero__daily { padding: 10px 18px; font-size: 14px; white-space: nowrap; }
+.hero__daily-ico { font-size: 16px; }
 .hero::after {
   content: "";
   position: absolute;
@@ -117,29 +139,6 @@
   background: radial-gradient(circle, rgba(110, 231, 255, 0.3), transparent 65%);
   pointer-events: none;
 }
-.hero__row {
-  position: relative; z-index: 1;
-  display: flex; align-items: center; flex-wrap: nowrap;
-  gap: 6px; min-width: 0; overflow: hidden;
-}
-.hero__stat {
-  flex: none;
-  font-size: 12px; color: var(--ink-2);
-  padding: 3px 10px; border-radius: 99px;
-  background: rgba(8, 12, 28, .45);
-  border: 1px solid var(--border);
-  white-space: nowrap;
-}
-.hero__stat b { color: #fff; font-size: 13px; font-weight: 800; }
-.hero__daily {
-  flex: none;
-  margin-left: auto;
-  padding: 5px 14px;
-  font-size: 12.5px;
-  white-space: nowrap;
-}
-.hero__tip { position: relative; z-index: 1; margin-top: 6px; font-size: 11px; color: var(--ink-3); }
-
 .levelbar { position: relative; z-index: 1; margin-top: 9px; height: 4px; border-radius: 99px; background: rgba(132, 166, 255, .16); overflow: hidden; }
 .levelbar__fill { height: 100%; border-radius: 99px; background: var(--grad-hero); transition: width .6s cubic-bezier(.22,1,.36,1); }
 
@@ -260,10 +259,18 @@
 .trainbar__chip.is-done { color: var(--c-green); border-color: rgba(74, 222, 128, .4); }
 .trainbar__chip.is-now { color: #06121f; background: var(--grad-hero); border-color: transparent; font-weight: 700; }
 
+/* 横屏侧栏：内容多时仍可滚动，但不显示滚动条 */
+.stage.is-land .stage__side { scrollbar-width: none; }
+.stage.is-land .stage__side::-webkit-scrollbar { display: none; }
+
 @media (max-width: 640px) {
   .home { padding: 10px 10px calc(36px + var(--safe-b)); gap: 12px; }
-  .hero { padding: 8px 10px 8px; border-radius: var(--r-lg); }
-  .hero__tip { display: none; }
+  .hero { gap: 10px; padding: 10px 12px; }
+  .hero__badge { width: 42px; height: 42px; font-size: 22px; border-radius: 13px; }
+  .hero__title b { font-size: 14.5px; }
+  .hero__meta { gap: 8px; font-size: 11px; }
+  .hero__daily { padding: 8px 12px; font-size: 13px; gap: 4px; }
+  .hero__daily-ico { font-size: 14px; }
   .grid-games { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
   .topbar { padding: calc(8px + var(--safe-t)) 10px 8px; gap: 6px; }
   /* 右侧图标按钮：去掉圆角底色与边框，缩小一档 */
@@ -284,10 +291,6 @@
   .topbar__back { padding: 4px 12px 4px 10px; }
   .topbar__title { font-size: 15px; }
 
-  .hero__row { gap: 4px; }
-  .hero__stat { padding: 3px 7px; font-size: 11px; }
-  .hero__stat b { font-size: 12px; }
-  .hero__daily { padding: 4px 10px; font-size: 12px; }
   .gcard__desc { display: none; }
   .gcard { padding: 12px; gap: 8px; }
   .gcard__icon { width: 42px; height: 42px; font-size: 22px; }
@@ -297,27 +300,36 @@
   .gcard__tags .tag:nth-child(2) { display: none; }
 }
 
-@media (max-width: 420px) {
-  /* 超窄屏：收起"累计挑战"，给右侧训练按钮留位 */
-  .hero__stat:nth-child(4) { display: none; }
+@media (max-width: 380px) {
+  .hero__plays { display: none; }
+  .hero__badge { display: none; }
+  .hero { grid-template-columns: minmax(0, 1fr) auto; }
 }
 
-/* 横屏手机等矮屏幕：顶栏、HUD 全部压扁，把高度留给棋盘 */
+/* 横屏手机等矮屏幕：顶栏、HUD、侧栏控件全部压扁，把高度留给棋盘 */
 @media (max-height: 520px) {
   .topbar { padding: calc(4px + var(--safe-t)) 12px 4px; }
   .topbar__logo { width: 30px; height: 30px; }
   .topbar__slogan { display: none; }
   .icon-btn { width: 32px; height: 32px; font-size: 15px; }
   .stage { padding: 6px 12px calc(6px + var(--safe-b)); gap: 8px; }
-  .stage.is-land { column-gap: 12px; grid-template-columns: clamp(180px, 30%, 280px) minmax(0, 1fr); }
+  .stage.is-land { column-gap: 12px; grid-template-columns: clamp(190px, 30%, 280px) minmax(0, 1fr); }
+  .stage.is-land .stage__side, .stage.is-land .stage__slot { gap: 6px; }
   .hud { min-height: 0; padding: 6px 8px; }
-  .hud__v { font-size: 16px; }
+  .stage.is-land .hud { grid-template-columns: repeat(auto-fit, minmax(60px, 1fr)); gap: 4px 2px; padding: 6px 4px; border-radius: 12px; }
+  .hud__v { font-size: 15px; }
   .hud__k { font-size: 10px; }
-  .stage__slot .pill { font-size: 11.5px; padding: 5px 10px; }
-  .stage.is-land .stage__slot .controls { gap: 6px !important; }
-  .seg__item { padding: 5px 11px; font-size: 12px; }
-  .btn--sm { padding: 6px 12px; font-size: 12.5px; }
+  .stage__slot .pill { font-size: 11px; padding: 4px 10px; line-height: 1.4; }
+  .stage.is-land .stage__slot .controls { gap: 5px !important; }
+  .seg { padding: 3px; gap: 2px; }
+  .seg__item { padding: 4px 9px; font-size: 11.5px; }
+  .btn--sm { padding: 5px 10px; font-size: 12px; gap: 4px; }
+  .ctrl-group { padding: 2px 8px 2px 8px; }
+  .theme-select { padding: 4px 10px; font-size: 12px; }
   .home { padding-top: 8px; }
+  .hero { padding: 8px 12px; }
+  .hero__badge { width: 40px; height: 40px; font-size: 22px; }
+  .hero__daily { padding: 7px 14px; font-size: 13px; }
   .grid-games { grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 10px; }
   .gcard { padding: 12px; gap: 8px; }
   .gcard__desc { display: none; }

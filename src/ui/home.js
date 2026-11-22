@@ -23,19 +23,26 @@ export function renderHome(content) {
     : '已达最高称号，你就是光之智者！';
   const dailyDone = trained >= 3;
   const hero = el('section.hero', { title: heroTip }, [
-    el('div.hero__row', {}, [
-      el('span.hero__stat', { html: `🧠 脑力 <b>${power}</b>` }),
-      el('span.hero__stat', { text: `${lv.emoji} ${lv.title}` }),
-      el('span.hero__stat', { html: `🎯 今日 <b>${Math.min(trained, 99)}</b>` }),
-      el('span.hero__stat', { html: `🏆 <b>${totalPlays}</b> 次` }),
-      el('button.btn.btn--pop.btn--sm.hero__daily', {
-        text: dailyDone ? '✅ 再来一组' : '🎯 每日训练',
-        title: dailyDone ? '今日训练已完成，可继续加练' : '随机 3 个小游戏连做，完成额外奖励脑力',
-        onClick: () => { sound.play('go'); router.go('/training'); },
-      }),
+    el('div.hero__badge', { text: lv.emoji }),
+    el('div.hero__info', {}, [
+      el('div.hero__title', {}, [
+        el('b', { text: lv.title }),
+        el('span.hero__lv', { text: `Lv.${lv.lv}` }),
+      ]),
+      el('div.levelbar', {}, [el('div.levelbar__fill', { style: { width: `${Math.round(lv.progress * 100)}%` } })]),
+      el('div.hero__meta', {}, [
+        el('span', { html: `🧠 脑力 <b>${power}</b>` }),
+        el('span', { html: `今日 <b>${Math.min(trained, 99)}</b> 项` }),
+        el('span.hero__plays', { html: `共 <b>${totalPlays}</b> 次` }),
+      ]),
     ]),
-    el('div.levelbar', {}, [el('div.levelbar__fill', { style: { width: `${Math.round(lv.progress * 100)}%` } })]),
-    el('div.hero__tip', { text: heroTip }),
+    el('button.btn.btn--pop.hero__daily', {
+      title: dailyDone ? '今日训练已完成，可继续加练' : '随机 3 个小游戏连做，完成额外奖励脑力',
+      onClick: () => { sound.play('go'); router.go('/training'); },
+    }, [
+      el('span.hero__daily-ico', { text: dailyDone ? '✅' : '🎯' }),
+      el('span', { text: dailyDone ? '再练一组' : '每日训练' }),
+    ]),
   ]);
 
   const hidden = new Set(save.settings.hidden || []);

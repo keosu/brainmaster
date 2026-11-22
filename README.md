@@ -71,7 +71,7 @@ brain_master/
    │  ├─ audio.js             WebAudio 合成音效 + TTS 语音
    │  ├─ router.js            hash 路由
    │  └─ utils.js             DOM 构建器 el() / 随机 / 颜色 / 事件总线
-   ├─ themes/                 【素材中心】翻牌 / 拼图 / 找不同的图案来源
+   ├─ themes/                 【素材中心】翻牌 / 拼图 / 找不同的图案来源（scenes.js 为各主题的拼图整幅插画）
    │  ├─ index.js             主题注册表（内置 5 套 + registerTheme 扩展）
    │  └─ svg.js               程序化 SVG 素材生成器（英雄/怪兽/动物/宇宙/几何）
    ├─ ui/                     通用界面
@@ -285,7 +285,7 @@ npm run android:apk      # cap sync + gradlew assembleDebug
 - `android/` —— Capacitor 生成的原生工程（已包含 TTS 等插件）
 
 ### 应用图标
-图标是戴学士帽的小脑袋吉祥物，源头在 `src/ui/logo.js`（应用内 Logo 也用它）。改完后执行：
+图标是渐变底上的白色拼图块 + 金色闪光，源头在 `src/ui/logo.js`（应用内 Logo 也用它）。改完后执行：
 ```bash
 npm run icons            # 重新生成 PWA 图标、安卓 mipmap（含自适应图标前景）和各尺寸开屏图
 ```

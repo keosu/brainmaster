@@ -1,5 +1,6 @@
 /**
- * 设置面板：声音 / 语音 / 震动 / 全屏、安装到桌面、隐藏游戏、导出导入存档
+ * 设置面板：偏好开关、安装到桌面、显示的游戏、存档备份
+ * 宽屏 / 横屏左右两栏，竖屏上下排列；所有改动即时生效，无需"保存"
  */
 import { el } from '../core/utils.js';
 import { save } from '../core/storage.js';
@@ -10,17 +11,31 @@ import { showModal, closeModal, toast } from './modal.js';
 
 const APP_VERSION = typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : 'dev';
 
-function toggleRow(label, desc, key, onChange) {
-  const input = el('input.switch__input', { type: 'checkbox' });
-  input.checked = !!save.settings[key];
-  input.addEventListener('change', () => {
-    save.setSetting(key, input.checked);
-    onChange?.(input.checked);
+/** 偏好开关：做成可点击的小方块，比一行行的开关更紧凑 */
+function tile(icon, label, key, onChange) {
+  const node = el('button.set-tile', { type: 'button' }, [
+    el('span.set-tile__ico', { text: icon }),
+    el('span.set-tile__label', { text: label }),
+    el('span.set-tile__state'),
+  ]);
+  const sync = () => {
+    const on = !!save.settings[key];
+    node.classList.toggle('is-on', on);
+    node.querySelector('.set-tile__state').textContent = on ? '开' : '关';
+  };
+  node.addEventListener('click', () => {
+    const v = save.toggleSetting(key);
+    sync();
+    onChange?.(v);
   });
-  return el('label.switch', {}, [
-    el('div.switch__text', {}, [el('b', { text: label }), desc ? el('span', { text: desc }) : null]),
-    input,
-    el('span.switch__track', {}, [el('i')]),
+  sync();
+  return node;
+}
+
+function section(title, extra, children) {
+  return el('section.set-sec', {}, [
+    el('div.set-sec__head', {}, [el('span.set-sec__title', { text: title }), extra]),
+    children,
   ]);
 }
 
@@ -31,71 +46,99 @@ export function openSettings({ onChange } = {}) {
     window.dispatchEvent(new CustomEvent('bm:settings-changed'));
   };
 
-  const toggles = el('div.settings__toggles', {}, [
-    toggleRow('🔊 音效', '答对答错的提示音', 'sound', (v) => { sound.setEnabled(v); if (v) sound.play('good'); changed(); }),
-    toggleRow('🗣️ 语音朗读', '读题目、报成绩', 'voice', (v) => { voice.setEnabled(v); if (v) voice.speak('语音已开启'); }),
-    toggleRow('📳 震动反馈', '手机上点击时轻微震动', 'haptics', (v) => { if (v) navigator.vibrate?.(20); }),
+  /* ---------- 偏好 ---------- */
+  const tiles = el('div.set-tiles', {}, [
+    tile('🔊', '音效', 'sound', (v) => { sound.setEnabled(v); if (v) sound.play('good'); changed(); }),
+    tile('🗣️', '语音朗读', 'voice', (v) => { voice.setEnabled(v); if (v) voice.speak('语音已开启'); }),
+    tile('📳', '震动反馈', 'haptics', (v) => { if (v) navigator.vibrate?.(20); }),
     !isNative() && canFullscreen()
-      ? toggleRow('⛶ 自动全屏', '手机浏览器里点一下就全屏，隐藏状态栏', 'fullscreen', (v) => { if (v) enterFullscreen(); })
-      : null,
+      ? tile('⛶', '自动全屏', 'fullscreen', (v) => { if (v) enterFullscreen(); })
+      : tile('💡', '黑白棋提示', 'hints'),
   ]);
 
-  const installBox = buildInstall();
-
+  /* ---------- 显示的游戏 ---------- */
   const hidden = new Set(save.settings.hidden || []);
-  const list = el('div.settings__games');
-  GAMES.forEach((g) => {
-    const cb = el('input.settings__cb', { type: 'checkbox' });
-    cb.checked = !hidden.has(g.id);
-    cb.addEventListener('change', () => {
-      if (cb.checked) hidden.delete(g.id);
-      else hidden.add(g.id);
-      save.setSetting('hidden', Array.from(hidden));
-      changed();
+  const count = el('span.set-sec__badge');
+  const chips = GAMES.map((g) => {
+    const chip = el('button.set-chip', { type: 'button', title: g.desc }, [
+      el('span.set-chip__ico', { text: g.emoji }),
+      el('span.set-chip__name', { text: g.name }),
+    ]);
+    chip.dataset.id = g.id;
+    chip.addEventListener('click', () => {
+      if (hidden.has(g.id)) hidden.delete(g.id);
+      else if (GAMES.length - hidden.size > 1) hidden.add(g.id);
+      else { toast('至少保留一个游戏'); return; }
+      sound.play('tap');
+      commit();
     });
-    list.appendChild(el('label.settings__game', {}, [
-      cb,
-      el('span.settings__emoji', { text: g.emoji }),
-      el('span', { text: g.name }),
-      el('span.settings__cat', { text: g.category }),
-    ]));
+    return chip;
   });
+  const syncChips = () => {
+    chips.forEach((c) => c.classList.toggle('is-off', hidden.has(c.dataset.id)));
+    count.textContent = `${GAMES.length - hidden.size}/${GAMES.length}`;
+  };
+  const commit = () => {
+    save.setSetting('hidden', Array.from(hidden));
+    syncChips();
+    changed();
+  };
+  const allBtn = el('button.set-link', {
+    type: 'button',
+    text: '全部显示',
+    onClick: () => { hidden.clear(); commit(); },
+  });
+  syncChips();
 
+  /* ---------- 数据 ---------- */
   const fileInput = el('input', {
     type: 'file', accept: 'application/json,.json',
     style: { display: 'none' },
     onChange: (e) => doImport(e),
   });
-  const btnExport = el('button.btn.btn--sm', { text: '⬇️ 导出数据', onClick: () => doExport() });
-  const btnImport = el('button.btn.btn--sm', { text: '⬆️ 导入数据', onClick: () => fileInput.click() });
-  const btnCopy = el('button.btn.btn--sm.btn--ghost', { text: '📋 复制存档文本', onClick: () => doCopy() });
-
-  const body = el('div.settings', {}, [
-    toggles,
-    installBox,
-    el('div.settings__data-title', { text: `🎮 显示的游戏（${GAMES.length} 个）` }),
-    el('p.settings__hint', { text: '关闭的游戏不会出现在首页和「每日训练」里。' }),
-    list,
-    el('div.settings__data-title', { text: '💾 数据备份与恢复' }),
-    el('div.settings__data', {}, [btnExport, btnImport, btnCopy, fileInput]),
-    el('p.settings__hint', {
-      text: '换机、重装或清理前先「导出数据」，之后用「导入数据」选回该文件即可恢复。手机上没有下载文件时，可用「复制存档文本」粘贴到备忘录保存。',
-    }),
-    el('p.settings__ver', { text: `Brain Master · 脑力大师 v${APP_VERSION}` }),
+  const dataBtn = (icon, label, onClick) => el('button.set-data__btn', { type: 'button', onClick }, [
+    el('span', { text: icon }), el('span', { text: label }),
+  ]);
+  const data = el('div.set-data', {}, [
+    dataBtn('⬇️', '导出存档', () => doExport()),
+    dataBtn('⬆️', '导入存档', () => fileInput.click()),
+    dataBtn('📋', '复制文本', () => doCopy()),
+    fileInput,
   ]);
 
-  showModal({
-    title: '⚙️ 设置',
-    body,
-    actions: [{ label: '完成', primary: true }],
-  });
+  const body = el('div.set', {}, [
+    el('div.set__head', {}, [
+      el('div.set__title', {}, [el('b', { text: '设置' }), el('span', { text: `v${APP_VERSION}` })]),
+      el('button.set__close', { type: 'button', 'aria-label': '关闭', text: '✕', onClick: () => closeModal() }),
+    ]),
+    el('div.set__cols', {}, [
+      el('div.set__col', {}, [
+        section('偏好', null, tiles),
+        buildInstall(),
+        section('存档备份', null, el('div', {}, [
+          data,
+          el('p.set-note', { text: '换机或清理前先导出，之后导入同一文件即可恢复进度。' }),
+        ])),
+      ]),
+      el('div.set__col', {}, [
+        section('显示的游戏', el('span.set-sec__tools', {}, [count, allBtn]),
+          el('div', {}, [
+            el('div.set-games', {}, chips),
+            el('p.set-note', { text: '点一下隐藏 / 显示；隐藏的游戏不会出现在首页和每日训练里。' }),
+          ])),
+      ]),
+    ]),
+  ]);
+
+  showModal({ body, className: 'modal--settings' });
 }
 
 function buildInstall() {
   if (isNative() || isStandalone()) return null;
   if (canInstall()) {
-    return el('div.settings__install', {}, [
-      el('div', {}, [el('b', { text: '📲 安装到桌面' }), el('span', { text: '像 App 一样全屏打开，离线也能玩' })]),
+    return el('div.set-install', {}, [
+      el('span.set-install__ico', { text: '📲' }),
+      el('div', {}, [el('b', { text: '安装到桌面' }), el('span', { text: '全屏打开，离线也能玩' })]),
       el('button.btn.btn--sm.btn--primary', {
         text: '安装',
         onClick: async () => {
@@ -106,8 +149,9 @@ function buildInstall() {
     ]);
   }
   if (isIOS()) {
-    return el('div.settings__install', {}, [
-      el('div', {}, [el('b', { text: '📲 添加到主屏幕' }), el('span', { text: '点 Safari 底部的「分享」按钮 →「添加到主屏幕」，即可全屏离线玩' })]),
+    return el('div.set-install', {}, [
+      el('span.set-install__ico', { text: '📲' }),
+      el('div', {}, [el('b', { text: '添加到主屏幕' }), el('span', { text: 'Safari 底部「分享」→「添加到主屏幕」' })]),
     ]);
   }
   return null;
@@ -143,7 +187,7 @@ async function doCopy() {
     toast('存档文本已复制，可粘贴到备忘录保存');
   } catch (err) {
     console.warn(err);
-    toast('复制失败，请用「导出数据」');
+    toast('复制失败，请用「导出存档」');
   }
 }
 

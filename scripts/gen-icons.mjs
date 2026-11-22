@@ -30,7 +30,7 @@ function out(path, data) {
 /* ---------------- PWA ---------------- */
 const rounded = iconSvg({ bg: 'rounded', scale: 0.86 });
 const square = iconSvg({ bg: 'square', scale: 0.86 });
-const maskable = iconSvg({ bg: 'square', scale: 0.72, sparkles: false });
+const maskable = iconSvg({ bg: 'square', scale: 0.72 });
 
 out(join(PUB, 'icon.svg'), rounded);
 out(join(PUB, 'icon-192.png'), png(rounded, 192));
@@ -44,7 +44,7 @@ console.log('✓ public/icons');
 /* ---------------- Android 启动图标 ---------------- */
 const DENSITIES = { mdpi: 1, hdpi: 1.5, xhdpi: 2, xxhdpi: 3, xxxhdpi: 4 };
 const legacy = iconSvg({ bg: 'rounded', scale: 0.84 });
-const round = iconSvg({ bg: 'circle', scale: 0.78, sparkles: false });
+const round = iconSvg({ bg: 'circle', scale: 0.78 });
 // 自适应图标：108dp 画布中只有直径 66dp 的圆保证可见，前景要收在里面
 const foreground = iconSvg({ bg: 'none', scale: 0.6 });
 

@@ -11,7 +11,7 @@ import { showModal, dismissTop, clearOverlays, toast } from './modal.js';
 import { openSettings } from './settings.js';
 import { iconSvg } from './logo.js';
 
-export const LOGO_URL = svgToDataUri(iconSvg({ bg: 'rounded', scale: 0.9, sparkles: false }));
+export const LOGO_URL = svgToDataUri(iconSvg({ bg: 'rounded', scale: 0.9 }));
 
 export function boot(app) {
   clear(app);
@@ -197,6 +197,18 @@ export function boot(app) {
   }
 
   /* ---------- 路由 ---------- */
+  // 游戏进行中离开（返回键、Esc、系统返回手势）先确认，防止误触退出
+  let allowLeave = false;
+  router.setGuard((nextHash) => {
+    if (allowLeave) { allowLeave = false; return true; }
+    if (!runner.inProgress) return true;
+    runner.confirmLeave(() => {
+      allowLeave = true;
+      location.hash = nextHash;
+    });
+    return false;
+  });
+
   router.onRoute(({ seg, query }) => {
     const [root, param] = seg;
     if (!root) return showHome();

@@ -13,6 +13,7 @@
  */
 import { svgToDataUri } from '../core/utils.js';
 import * as S from './svg.js';
+import { heroesScene, monstersScene, animalsScene, spaceScene, shapesScene } from './scenes.js';
 
 const HERO_COLORS = [
   ['#e0243a', '#ffe066'], ['#2f6fe0', '#8ef2ff'], ['#16a34a', '#ffe066'],
@@ -47,7 +48,7 @@ function heroesTheme() {
     id: 'heroes', name: '光之英雄', emoji: '⚡', kind: 'svg',
     palette: ['#5b8cff', '#ffd166'],
     faces,
-    art: () => S.sceneArt({ palette: ['#5b8cff', '#ffd166'], items: faces.slice(0, 7).map((f) => f.svg), seed: 11 }),
+    art: heroesScene,
   };
 }
 
@@ -62,7 +63,7 @@ function monstersTheme() {
     id: 'monsters', name: '怪兽军团', emoji: '👹', kind: 'svg',
     palette: ['#7b5cff', '#22c55e'],
     faces,
-    art: () => S.sceneArt({ palette: ['#7b5cff', '#22c55e'], items: faces.slice(0, 7).map((f) => f.svg), seed: 23 }),
+    art: monstersScene,
   };
 }
 
@@ -76,7 +77,7 @@ function animalsTheme() {
     id: 'animals', name: '动物伙伴', emoji: '🐼', kind: 'svg',
     palette: ['#f2c14e', '#5fd35f'],
     faces,
-    art: () => S.sceneArt({ palette: ['#f2c14e', '#5fd35f'], items: faces.slice(0, 7).map((f) => f.svg), seed: 37 }),
+    art: animalsScene,
   };
 }
 
@@ -90,7 +91,7 @@ function spaceTheme() {
     id: 'space', name: '宇宙探险', emoji: '🚀', kind: 'svg',
     palette: ['#6ee7ff', '#b46bff'],
     faces,
-    art: () => S.sceneArt({ palette: ['#6ee7ff', '#b46bff'], items: faces.map((f) => f.svg), seed: 53 }),
+    art: spaceScene,
   };
 }
 
@@ -102,7 +103,7 @@ function shapesTheme() {
     id: 'shapes', name: '几何图形', emoji: '🔷', kind: 'svg',
     palette: ['#6ee7ff', '#ff6b9d'],
     faces,
-    art: () => S.sceneArt({ palette: ['#6ee7ff', '#ff6b9d'], items: faces.slice(0, 7).map((f) => f.svg), seed: 71 }),
+    art: shapesScene,
   };
 }
 
