@@ -7,17 +7,25 @@ import { el, pick, randInt } from '../../core/utils.js';
 import { levelBar, themeBar, controlRow } from '../../ui/widgets.js';
 import { faceUrl } from '../../themes/index.js';
 import { save } from '../../core/storage.js';
+import { floatText } from '../../ui/modal.js';
 
 /* 异类的"变身"方式：差异要一眼能看出来 */
 const DIFFS = {
   // 标准：明显小一圈
   normal: () => [{ transform: `scale(${randInt(66, 74) / 100})` }],
-  // 困难（默认）：镜像 / 黑白 / 反色 / 变色，随机抽一种
+  // 困难：镜像 / 黑白 / 反色 / 变色，随机抽一种
   hard: () => [pick([
     { transform: 'scaleX(-1)' },
     { filter: 'grayscale(1)' },
     { filter: `hue-rotate(${randInt(100, 160)}deg)` },
     { filter: 'invert(.92)' },
+  ])],
+  // 大师：差异更细微（轻微旋转 / 小幅缩放 / 淡色）
+  master: () => [pick([
+    { transform: `rotate(${pick([-1, 1]) * randInt(16, 24)}deg)` },
+    { transform: `scale(${randInt(80, 86) / 100})` },
+    { filter: `hue-rotate(${randInt(50, 80)}deg)` },
+    { transform: 'scaleX(-1)' },
   ])],
 };
 
@@ -28,6 +36,7 @@ export default class OddGame extends Game {
     this.duration = Number(this.options.time || 30000);
     this.score = 0;
     this.streak = 0;
+    this.bestStreak = 0;
     this.right = 0;
     this.wrong = 0;
     this.done = false;
@@ -86,6 +95,7 @@ export default class OddGame extends Game {
     if (i === this.oddAt) {
       this.right += 1;
       this.streak += 1;
+      this.bestStreak = Math.max(this.bestStreak, this.streak);
       this.score += 10 + Math.min(20, this.streak * 2);
       this.sound.play(this.streak >= 4 ? 'great' : 'good');
       item.classList.add('is-right');
@@ -93,8 +103,8 @@ export default class OddGame extends Game {
       this.hud.patch('streak', `x${this.streak}`);
       // 连对奖励时间
       if (this.streak % 4 === 0) {
-        this.timer.left = Math.min(this.duration, this.timer.left + 2000);
-        this.timer.endAt = performance.now() + this.timer.left;
+        this.timer.addTime(2000, this.duration);
+        floatText(item, '+2秒', 'var(--c-green)');
       }
       this.later(() => this.next(), 380);
     } else {
@@ -133,7 +143,7 @@ export default class OddGame extends Game {
       stats: [
         { label: '找到', value: this.right },
         { label: '正确率', value: `${Math.round(acc * 100)}%` },
-        { label: '最高连对', value: `x${this.streak}` },
+        { label: '最高连对', value: `x${this.bestStreak}` },
       ],
     });
   }

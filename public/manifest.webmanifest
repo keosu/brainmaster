@@ -1,0 +1,25 @@
+{
+  "id": "./",
+  "name": "Brain Master · 脑力大师",
+  "short_name": "脑力大师",
+  "description": "给小朋友的益智游戏合集：记忆、计算、逻辑、空间、反应，每天 5 分钟练出最强大脑。",
+  "lang": "zh-CN",
+  "start_url": "./index.html#/",
+  "scope": "./",
+  "display": "fullscreen",
+  "display_override": ["fullscreen", "standalone"],
+  "orientation": "any",
+  "background_color": "#0a0e1f",
+  "theme_color": "#0a0e1f",
+  "categories": ["games", "education", "kids"],
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/maskable-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ],
+  "shortcuts": [
+    { "name": "每日训练", "short_name": "训练", "url": "./index.html#/training", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] }
+  ]
+}

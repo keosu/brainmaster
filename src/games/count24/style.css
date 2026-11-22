@@ -37,7 +37,7 @@
 
 .c24-card {
   flex: 0 1 auto;
-  width: clamp(58px, 18vw, 148px);
+  width: clamp(58px, calc((min(96vw, var(--fit-w, 92vw), 900px) - 80px) / 4), 148px);
   height: 100%;
   max-height: 300px;
   aspect-ratio: 3 / 4;
@@ -84,6 +84,9 @@
   color: #06131f;
   box-shadow: 0 10px 22px rgba(91, 140, 255, .4);
 }
+
+.c24-op.is-hint { animation: c24Hint .5s ease 3; background: var(--grad-pop); color: #2a0a1a; }
+@keyframes c24Hint { 50% { transform: scale(1.15); box-shadow: 0 0 22px rgba(255, 209, 102, .7); } }
 
 @media (max-width: 480px) {
   .c24-target { padding: 6px 14px; }

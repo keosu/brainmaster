@@ -1,14 +1,17 @@
 /** 应用外壳：顶栏 + 路由 + 舞台 + 每日训练流程 */
-import { el, clear } from '../core/utils.js';
-import { save } from '../core/storage.js';
+import { el, clear, svgToDataUri } from '../core/utils.js';
+import { save, levelOf } from '../core/storage.js';
 import { sound, voice } from '../core/audio.js';
 import * as router from '../core/router.js';
+import { canFullscreen, toggleFullscreen, isFullscreen } from '../core/platform.js';
 import { renderHome, pickTrainingSet } from './home.js';
 import { Runner } from './runner.js';
 import { getGameMeta } from '../games/manifest.js';
-import { showModal, clearOverlays, toast } from './modal.js';
-import { levelOf } from '../core/storage.js';
+import { showModal, dismissTop, clearOverlays, toast } from './modal.js';
 import { openSettings } from './settings.js';
+import { iconSvg } from './logo.js';
+
+export const LOGO_URL = svgToDataUri(iconSvg({ bg: 'rounded', scale: 0.9, sparkles: false }));
 
 export function boot(app) {
   clear(app);
@@ -18,7 +21,7 @@ export function boot(app) {
     onClick: () => router.home(),
     'aria-label': '返回首页',
   }, [
-    el('span.topbar__back-ico', { text: '🏠' }),
+    el('span.topbar__back-ico', { text: '‹' }),
     el('span.topbar__back-label', { text: '首页' }),
   ]);
 
@@ -28,53 +31,62 @@ export function boot(app) {
   ]);
 
   const brand = el('div.topbar__brand', {}, [
-    el('div', {
-      text: '🧠',
-      style: { width: '36px', height: '36px', borderRadius: '12px', display: 'grid', placeItems: 'center', background: 'var(--grad-hero)', fontSize: '19px' },
-    }),
-    el('div.topbar__title.topbar__title--brand', { text: 'Brain Master' }),
-    el('span.topbar__slogan', { text: '每天 5 分钟，练出最强大脑' }),
+    el('img.topbar__logo', { src: LOGO_URL, alt: '' }),
+    el('div.topbar__brandtext', {}, [
+      el('div.topbar__title.topbar__title--brand', { text: '脑力大师' }),
+      el('span.topbar__slogan', { text: 'Brain Master · 每天 5 分钟' }),
+    ]),
   ]);
 
-  const btnSound = iconBtn('🔊', () => {
+  const btnHelp = iconBtn('❓', '玩法说明', () => runner.showHelp());
+
+  const btnFull = iconBtn('⛶', '全屏', () => toggleFullscreen());
+  btnFull.classList.toggle('u-hide', !canFullscreen());
+  const syncFull = () => {
+    btnFull.classList.toggle('is-on', isFullscreen());
+    btnFull.title = isFullscreen() ? '退出全屏' : '全屏';
+  };
+  document.addEventListener('fullscreenchange', syncFull);
+  document.addEventListener('webkitfullscreenchange', syncFull);
+
+  const btnSound = iconBtn(save.settings.sound ? '🔊' : '🔇', '音效', () => {
     const v = save.toggleSetting('sound');
     sound.setEnabled(v);
     btnSound.textContent = v ? '🔊' : '🔇';
     btnSound.classList.toggle('is-off', !v);
     if (v) sound.play('tap');
-  }, !save.settings.sound);
+  });
+  btnSound.classList.toggle('is-off', !save.settings.sound);
 
-  const btnVoice = iconBtn('🗣️', () => {
-    const v = save.toggleSetting('voice');
-    voice.setEnabled(v);
-    btnVoice.classList.toggle('is-off', !v);
-    if (v) { voice.speak('语音已开启'); toast('🔊 语音已开启'); }
-    else toast('🔇 语音已关闭');
-  }, !save.settings.voice);
+  const btnSettings = iconBtn('⚙️', '设置', () => openSettings({ onChange: syncSettings }));
 
-  const btnSettings = iconBtn('⚙️', () => openSettings(), false);
+  function syncSettings() {
+    btnSound.textContent = save.settings.sound ? '🔊' : '🔇';
+    btnSound.classList.toggle('is-off', !save.settings.sound);
+  }
 
   const topbar = el('header.topbar', {}, [
     back, brand, titleBox,
     el('div.topbar__spacer'),
-    el('div.topbar__actions', {}, [btnSettings, btnSound, btnVoice]),
+    el('div.topbar__actions', {}, [btnHelp, btnFull, btnSound, btnSettings]),
   ]);
 
   const content = el('div.shell__content');
-
   const shell = el('div.shell', {}, [topbar, content]);
   app.appendChild(shell);
 
   const runner = new Runner({ hudArea: null, gameArea: null });
-  let host = null;
   let trainState = null;
   let onHome = true;
 
   function setTopbar(mode, opts = {}) {
-    back.classList.toggle('u-hide', mode === 'home');
-    brand.classList.toggle('u-hide', mode !== 'home');
-    titleBox.classList.toggle('u-hide', mode === 'home');
-    if (mode !== 'home') {
+    const home = mode === 'home';
+    back.classList.toggle('u-hide', home);
+    brand.classList.toggle('u-hide', !home);
+    titleBox.classList.toggle('u-hide', home);
+    btnHelp.classList.toggle('u-hide', home || !opts.help);
+    shell.classList.toggle('is-home', home);
+    if (!home) {
       titleBox.children[0].textContent = opts.title || '';
       titleBox.children[1].textContent = opts.sub || '';
     }
@@ -88,18 +100,20 @@ export function boot(app) {
     setTopbar('home');
     onHome = true;
     renderHome(content);
-    window.scrollTo({ top: 0 });
+    content.scrollTo?.({ top: 0 });
   }
 
   /* ---------- 单游戏 ---------- */
   function ensureStage() {
     clear(content);
     const hudArea = el('div.stage__hud');
+    const sideSlot = el('div.stage__slot');
+    const side = el('aside.stage__side', {}, [hudArea, sideSlot]);
     const trainArea = el('div.stage__train');
     const body = el('div.stage__body');
-    const stage = el('main.stage', {}, [trainArea, hudArea, body]);
+    const stage = el('main.stage', {}, [trainArea, side, body]);
     content.appendChild(stage);
-    host = { hudArea, gameArea: body, trainArea };
+    const host = { hudArea, gameArea: body, trainArea, stage, sideSlot };
     runner.host = host;
     return host;
   }
@@ -110,7 +124,8 @@ export function boot(app) {
     const h = ensureStage();
     clear(h.trainArea);
     onHome = false;
-    setTopbar('game', { title: `${meta.emoji} ${meta.name}`, sub: meta.category });
+    trainState = null;
+    setTopbar('game', { title: `${meta.emoji} ${meta.name}`, sub: meta.category, help: !!meta.how });
     runner.load(id, query);
   }
 
@@ -119,23 +134,24 @@ export function boot(app) {
     const set = pickTrainingSet(3);
     if (!set.length) { showHome(); return; }
     const h = ensureStage();
+    h.stage.classList.add('has-train');
     clearOverlays();
-    setTopbar('game', { title: '🎯 每日训练', sub: '3 个项目连做' });
+    onHome = false;
+    setTopbar('game', { title: '🎯 每日训练', sub: '3 个项目连做', help: true });
     trainState = { list: set, i: 0, scores: [] };
 
     const renderBar = () => {
       clear(h.trainArea);
       const bar = el('div.trainbar');
       set.forEach((g, idx) => {
-        const done = idx < trainState.i;
-        const now = idx === trainState.i;
+        const done = idx < trainState.i - 1;
+        const now = idx === trainState.i - 1;
         bar.appendChild(el(`div.trainbar__chip${done ? '.is-done' : now ? '.is-now' : ''}`, {
           text: `${done ? '✓ ' : ''}${g.emoji} ${g.name}`,
         }));
       });
       h.trainArea.appendChild(bar);
     };
-    renderBar();
 
     const next = () => {
       if (trainState.i >= set.length) return finishTraining();
@@ -145,11 +161,11 @@ export function boot(app) {
       renderBar();
       runner.load(g.id, g.theme ? { theme: save.settings.theme } : {}, {
         onFinish: {
-          label: idx === set.length - 1 ? '查看总结' : '下一个',
+          label: idx === set.length - 1 ? '查看总结' : '下一个 ›',
           onNext: () => next(),
         },
         onScore: (r) => {
-          trainState.scores.push({ name: g.name, score: r.score, stars: r.stars, emoji: g.emoji });
+          trainState.scores.push({ name: g.name, score: r.score, stars: r.stars, emoji: g.emoji, unit: g.unit });
         },
       });
     };
@@ -157,18 +173,18 @@ export function boot(app) {
   }
 
   function finishTraining() {
-    const total = trainState.scores.reduce((a, b) => a + b.score, 0);
-    const bonus = Math.round(total * 0.5) + 20;
+    const starsTotal = trainState.scores.reduce((a, b) => a + (b.stars || 0), 0);
+    const bonus = 20 + starsTotal * 6;
     const power = save.addPower(bonus);
     const lv = levelOf(power);
     clearOverlays();
     showModal({
       emoji: '🏅',
       title: '今日训练完成！',
-      sub: `三个项目全部通关，额外奖励脑力 ${bonus} 点。当前称号：${lv.emoji} ${lv.title}`,
+      sub: `三个项目全部完成，额外奖励脑力 ${bonus} 点。当前称号：${lv.emoji} ${lv.title}`,
       body: el('div.modal__stats', {}, trainState.scores.map((s) => el('div.modal__stat', {}, [
-        el('b', { text: String(s.score) }),
-        el('span', { text: `${s.emoji} ${s.name}` }),
+        el('b', { text: `${s.score}${s.unit || ''}` }),
+        el('span', { text: `${s.emoji} ${s.name} ${'⭐'.repeat(s.stars || 0)}` }),
       ]))),
       actions: [
         { label: '再来一组', primary: true, onClick: () => router.go('/training') },
@@ -191,22 +207,31 @@ export function boot(app) {
 
   // Esc 返回首页（游戏中）
   window.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && runner.current) router.home();
+    if (e.key === 'Escape' && runner.current && !document.querySelector('#overlay-root .overlay')) router.home();
   });
 
   // 设置里隐藏/导入游戏后，若停留在首页则原地刷新
   window.addEventListener('bm:settings-changed', () => {
+    syncSettings();
     if (onHome) { clear(content); renderHome(content); }
   });
 
-  // 首次交互解锁音频
-  const unlock = () => { sound.play('tap'); window.removeEventListener('pointerdown', unlock); };
-  window.addEventListener('pointerdown', unlock, { once: true });
+  window.addEventListener('bm:update-ready', () => toast('✨ 新版本已下载，下次打开自动生效', 3200));
 
-  return { runner, showHome };
+  /** 安卓返回键：先关弹窗，再回首页；已在首页则交给系统（退到后台） */
+  function handleBack() {
+    if (dismissTop()) return true;
+    if (document.querySelector('#overlay-root .overlay')) {
+      if (!onHome) router.home();
+      return true;
+    }
+    if (!onHome) { router.home(); return true; }
+    return false;
+  }
+
+  return { runner, showHome, handleBack };
 }
 
-function iconBtn(emoji, onClick, off = false) {
-  const b = el(`button.icon-btn${off ? '.is-off' : ''}`, { text: emoji, onClick });
-  return b;
+function iconBtn(emoji, label, onClick) {
+  return el('button.icon-btn', { text: emoji, title: label, 'aria-label': label, onClick });
 }

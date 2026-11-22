@@ -2,8 +2,12 @@
   "appId": "com.brainmaster.app",
   "appName": "Brain Master",
   "webDir": "dist",
+  "backgroundColor": "#0a0e1f",
   "server": {
     "androidScheme": "https"
+  },
+  "android": {
+    "backgroundColor": "#0a0e1f"
   },
   "plugins": {
     "SplashScreen": {
@@ -14,9 +18,15 @@
       "splashImmersive": true,
       "backgroundColor": "#0a0e1f"
     },
+    "SystemBars": {
+      "insetsHandling": "css",
+      "style": "DARK",
+      "hidden": true,
+      "initialViewportFitValueHint": "cover"
+    },
     "StatusBar": {
-      "style": "Dark",
-      "backgroundColor": "#0a0e1f"
+      "overlaysWebView": true,
+      "style": "DARK"
     }
   }
 }

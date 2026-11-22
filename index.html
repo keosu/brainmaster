@@ -1,16 +1,26 @@
 <!doctype html>
-<html lang="zh-CN" data-page-node-id="iN198LeqmIS3dJrL9hBdhY">
-<head data-page-node-id="5HgE8lEtGyZc6NsJ1Jh5FJ">
-<meta charset="utf-8" data-page-node-id="sbeIFqOl1vxQcb62Eo8HBQ" />
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no" data-page-node-id="UJx3IXhwKzgT7lFY7HOGDx" />
-<meta name="theme-color" content="#0a0e1f" data-page-node-id="trm7WhObO59j6AjuDxpPD8" />
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no" />
+<meta name="theme-color" content="#0a0e1f" />
+<meta name="color-scheme" content="dark" />
+<meta name="description" content="给小朋友的益智游戏合集：记忆、计算、逻辑、空间、反应，每天 5 分钟练出最强大脑。" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="脑力大师" />
+<meta name="format-detection" content="telephone=no" />
 <title>Brain Master · 脑力大师</title>
-<link rel="stylesheet" href="./src/styles/base.css" data-page-node-id="4gNDPR39lVT8IdcKXzJPEI" />
-<link rel="stylesheet" href="./src/styles/layout.css" data-page-node-id="owXBINs7AEvtj6Jkf4BxSY" />
-<link rel="stylesheet" href="./src/styles/components.css" data-page-node-id="qL0xcUoiyBafW2Y2g6wbWC" />
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='44' fill='%236ee7ff'/%3E%3Cpath d='M50 8a42 42 0 0 0 0 84z' fill='%23b46bff'/%3E%3C/svg%3E" data-page-node-id="tggsyxgOxkmDyPjOOeUNOQ" />
+<link rel="manifest" href="./manifest.webmanifest" />
+<link rel="icon" type="image/svg+xml" href="./icons/icon.svg" />
+<link rel="icon" type="image/png" sizes="32x32" href="./icons/favicon-32.png" />
+<link rel="apple-touch-icon" href="./icons/apple-touch-icon.png" />
+<link rel="stylesheet" href="./src/styles/base.css" />
+<link rel="stylesheet" href="./src/styles/layout.css" />
+<link rel="stylesheet" href="./src/styles/components.css" />
 </head>
-<body data-page-node-id="01qO4VYVBlXb7kKBjleqsy">
+<body>
   <script>
     // 兜底：模块加载失败时给出可见提示，避免只剩空白页
     (function () {
@@ -30,16 +40,16 @@
         if (document.querySelector('.boot')) {
           fail('脚本加载超时，可能是通过 file:// 直接打开，导致 ES 模块被浏览器拦截。');
         }
-      }, 4000);
+      }, 6000);
     })();
   </script>
-  <div id="app" class="app" data-page-node-id="ugIc3GrHbjFBk6Ef4BZLvg">
-    <div class="boot" data-page-node-id="nG2lsLKr2HfKA1uKqpXEOH">
-      <div class="boot__brain" data-page-node-id="QNNWqNYT4BHAYRU6BUGdxe"></div>
-      <p data-page-node-id="iKSg5XE1DzF2qGWAvmAfuE">加载中…</p>
+  <div id="app" class="app">
+    <div class="boot">
+      <div class="boot__brain"></div>
+      <p>加载中…</p>
     </div>
   </div>
-  <div id="overlay-root" data-page-node-id="0ivY8hZsbzbD8ht2SRhO1S"></div>
+  <div id="overlay-root"></div>
   <script type="module" src="./src/main.js"></script>
 </body>
 </html>

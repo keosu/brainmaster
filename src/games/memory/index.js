@@ -2,7 +2,7 @@
  * 翻牌记忆 —— 主题驱动的配对游戏
  * 牌面素材来自主题包（可换成奥特曼 / 动物 / 任意图片）
  */
-import { Game } from '../../core/Game.js';
+import { Game, Timer } from '../../core/Game.js';
 import { el, shuffle, formatTime } from '../../core/utils.js';
 import { CARD_BACK, faceUrl } from '../../themes/index.js';
 import { levelBar, themeBar, controlRow } from '../../ui/widgets.js';
@@ -30,9 +30,10 @@ export default class MemoryGame extends Game {
     this.maxCombo = 0;
     this.locked = false;
     this.first = null;
-    this.startedAt = 0;
     this.cards = [];
     this.status = 'ready';
+    this.preview = Number(this.options.preview || 0);
+    this.timer = new Timer(this);
 
     /* ---------- 控件 ---------- */
     const lv = levelBar(this.meta, this.options.level, (id) => this.ctx.reload({ level: id }));
@@ -71,23 +72,34 @@ export default class MemoryGame extends Game {
     this.hud.show();
 
     /* ---------- 开始提示 ---------- */
-    const tip = el('div.pill', { text: `主题：${theme.name} · 找出 ${pairs} 对相同的图案` });
-    this.root.appendChild(tip);
+    this.tip = el('div.pill', { text: `主题：${theme.name} · 找出 ${pairs} 对相同的图案` });
+    this.root.appendChild(this.tip);
     this.say(`翻牌记忆，${theme.name}，开始`);
   }
 
   start() {
-    this.startedAt = performance.now();
-    this.every(() => {
-      if (this.status === 'done') return;
-      const ms = performance.now() - this.startedAt;
-      this.hud.patch('time', formatTime(ms));
-      this.hud.warn('time', ms > this.pairs * 12000);
-    }, 250);
+    const go = () => {
+      this.status = 'play';
+      this.timer.startCountUp((ms) => {
+        this.hud.patch('time', formatTime(ms));
+        this.hud.warn('time', ms > this.pairs * 12000);
+      });
+    };
+    if (!this.preview) { go(); return; }
+    // 简单 / 普通档：开局先把所有牌亮一下，帮小朋友建立印象
+    this.status = 'preview';
+    this.tip.textContent = '先记一记，牌马上会翻回去…';
+    this.later(() => { this.cards.forEach((c) => c.classList.add('is-open')); this.sound.play('flip'); }, 250);
+    this.later(() => {
+      this.cards.forEach((c) => c.classList.remove('is-open'));
+      this.sound.play('flip');
+      this.tip.textContent = `主题：${this.theme.name} · 找出 ${this.pairs} 对相同的图案`;
+      go();
+    }, 250 + this.preview);
   }
 
   flip(card) {
-    if (this.locked || this.status === 'done') return;
+    if (this.locked || this.status !== 'play') return;
     if (card.classList.contains('is-open') || card.classList.contains('is-done')) return;
 
     card.classList.add('is-open');
@@ -133,7 +145,8 @@ export default class MemoryGame extends Game {
 
   finishGame() {
     this.status = 'done';
-    const elapsed = performance.now() - this.startedAt;
+    this.timer.stop();
+    const elapsed = this.timer.ms || 0;
     const sec = elapsed / 1000;
     const target = this.pairs * 7;
     const timeBonus = Math.max(0, Math.round((target - sec) * 12));
@@ -157,5 +170,4 @@ export default class MemoryGame extends Game {
     });
   }
 
-  destroy() { /* 资源由基类统一清理 */ }
 }

@@ -12,7 +12,10 @@ const DEFAULT = {
     hints: true,      // 是否显示提示（如黑白棋可落点）
     theme: 'heroes',  // 当前主题包 id
     hidden: [],       // 被用户隐藏的游戏 id 列表
+    haptics: true,    // 震动反馈
+    fullscreen: true, // 手机浏览器里首次点击自动进入全屏（隐藏状态栏）
   },
+  seen: {},       // { [gameId]: 1 } 已看过玩法说明
   brain: {
     power: 0,     // 脑力值
     day: null,    // 最近训练日
@@ -138,6 +141,13 @@ export const save = {
     return cache;
   },
 
+  /* ---- 玩法说明 ---- */
+  hasSeen(gameId) { return !!read().seen[gameId]; },
+  markSeen(gameId) {
+    read().seen[gameId] = 1;
+    write();
+  },
+
   isHidden(id) {
     const h = read().settings.hidden;
     return Array.isArray(h) && h.includes(id);
@@ -171,8 +181,13 @@ export function levelOf(power) {
   return { ...cur, next, progress: next ? Math.min(1, got / span) : 1, remain: next ? next.need - power : 0 };
 }
 
-function todayKey() { return new Date().toISOString().slice(0, 10); }
+/** 按本地时区取日期，避免 UTC 跨日导致"今日训练"提前清零 */
+function localDay(d) {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+function todayKey() { return localDay(new Date()); }
 function yesterdayKey() {
-  const d = new Date(Date.now() - 86400000);
-  return d.toISOString().slice(0, 10);
+  const d = new Date();
+  d.setDate(d.getDate() - 1);
+  return localDay(d);
 }

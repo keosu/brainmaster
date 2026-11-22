@@ -2,11 +2,12 @@
  * 开屏：炫酷 Logo 闪现 —— 不需要任何点击，自动播放完自动消失。
  * 同一个浏览会话只出现一次（刷新后再进不再打扰）。
  */
-import { el } from '../core/utils.js';
+import { el, svgToDataUri } from '../core/utils.js';
+import { iconSvg } from './logo.js';
 
 const KEY = 'brainmaster.splash.shown';
 
-export function showSplash({ duration = 2100 } = {}) {
+export function showSplash({ duration = 2000 } = {}) {
   try {
     if (sessionStorage.getItem(KEY)) return null;
     sessionStorage.setItem(KEY, '1');
@@ -18,14 +19,14 @@ export function showSplash({ duration = 2100 } = {}) {
   const logo = el('div.splash__logo', {}, [
     el('div.splash__ring'),
     el('div.splash__ring.splash__ring--2'),
-    el('div.splash__core', { text: '🧠' }),
+    el('img.splash__core', { src: svgToDataUri(iconSvg({ bg: 'none', scale: 0.92 })), alt: '' }),
   ]);
 
   const title = el('h1.splash__title', {},
-    'BRAIN MASTER'.split('').map((ch, i) =>
+    '脑力大师'.split('').map((ch, i) =>
       el('span', {
-        text: ch === ' ' ? '\u00A0' : ch,
-        style: { animationDelay: `${420 + i * 55}ms` },
+        text: ch,
+        style: { animationDelay: `${420 + i * 90}ms` },
       })));
 
   const bar = el('div.splash__bar', {}, [el('i')]);
@@ -33,7 +34,7 @@ export function showSplash({ duration = 2100 } = {}) {
   const node = el('div.splash', {}, [
     logo,
     title,
-    el('p.splash__sub', { text: '脑 力 训 练 营' }),
+    el('p.splash__sub', { text: 'B R A I N · M A S T E R' }),
     bar,
   ]);
 

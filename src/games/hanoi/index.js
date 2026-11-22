@@ -25,8 +25,10 @@ export default class HanoiGame extends Game {
 
     const lv = levelBar(this.meta, this.options.level, (id) => this.ctx.reload({ level: id }));
     const undoBtn = el('button.btn.btn--sm.btn--ghost', { text: '↩️ 撤销', onClick: () => this.undo() });
+    const hintBtn = el('button.btn.btn--sm.btn--ghost', { text: '💡 提示', onClick: () => this.hint() });
     const restartBtn = el('button.btn.btn--sm.btn--ghost', { text: '🔄 重开', onClick: () => this.ctx.restart() });
-    this.root.appendChild(controlRow([lv, undoBtn, restartBtn]));
+    this.root.appendChild(controlRow([lv, undoBtn, hintBtn, restartBtn]));
+    this.hints = 0;
 
     /* ---------- 场景 ---------- */
     this.board = el('div.hn-board.fit-box');
@@ -60,7 +62,8 @@ export default class HanoiGame extends Game {
     this.applySize();
 
     this.root.appendChild(this.board);
-    this.root.appendChild(el('div.pill', { text: '点击柱子拿起盘子，再点另一根柱子放下' }));
+    this.tip = el('div.pill', { text: '点击柱子拿起盘子，再点另一根柱子放下' });
+    this.root.appendChild(this.tip);
 
     this.hud.set([
       { key: 'steps', label: '步数', value: '0' },
@@ -152,6 +155,33 @@ export default class HanoiGame extends Game {
     if (this.pegs[2].length === this.n) this.later(() => this.over(), 320);
   }
 
+  /**
+   * 任意局面下的最优下一步：要把 1..k 号盘都放到 target，
+   * 若 k 号盘不在 target，就得先把 1..k-1 挪到第三根柱子，再搬 k 号盘
+   */
+  nextMove(k, target) {
+    if (k === 0) return null;
+    const p = this.pegs.findIndex((s) => s.includes(k));
+    if (p === target) return this.nextMove(k - 1, target);
+    return this.nextMove(k - 1, 3 - p - target) || [p, target];
+  }
+
+  hint() {
+    if (this.done) return;
+    const mv = this.nextMove(this.n, 2);
+    if (!mv) return;
+    this.hints += 1;
+    this.selected = -1;
+    this.layout();
+    const zones = Array.from(this.zoneRow.children);
+    zones.forEach((z) => z.classList.remove('is-from', 'is-to'));
+    zones[mv[0]].classList.add('is-from');
+    zones[mv[1]].classList.add('is-to');
+    this.later(() => zones.forEach((z) => z.classList.remove('is-from', 'is-to')), 1800);
+    this.tip.textContent = `💡 把第 ${mv[0] + 1} 根柱子最上面的盘子，移到第 ${mv[1] + 1} 根`;
+    this.sound.play('flip');
+  }
+
   undo() {
     if (this.done || !this.history.length) return;
     const [from, to] = this.history.pop();
@@ -172,14 +202,14 @@ export default class HanoiGame extends Game {
     this.finish({
       score,
       mode: 'min',
-      stars: perfect ? 3 : good ? 2 : 1,
+      stars: Math.max(1, (perfect ? 3 : good ? 2 : 1) - (this.hints ? 1 : 0)),
       title: perfect ? '完美解法！' : good ? '搬完啦！' : '成功搬到右边！',
       message: `用了 ${this.steps} 步 · 最优 ${this.best} 步`,
       speak: perfect ? '完美，一步不多' : `用了 ${this.steps} 步完成`,
       stats: [
         { label: '你的步数', value: this.steps },
         { label: '最优步数', value: this.best },
-        { label: '盘子数', value: this.n },
+        { label: '提示', value: this.hints },
       ],
     });
   }

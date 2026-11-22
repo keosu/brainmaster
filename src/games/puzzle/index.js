@@ -3,7 +3,7 @@
  * 两种玩法：slide（滑块，留一个空位）/ swap（点两块交换）
  * 换素材 = 换主题，图片主题只需给一张 art 大图
  */
-import { Game } from '../../core/Game.js';
+import { Game, Timer } from '../../core/Game.js';
 import { el, formatTime, randInt } from '../../core/utils.js';
 import { levelBar, themeBar, controlRow } from '../../ui/widgets.js';
 import { artUrl } from '../../themes/index.js';
@@ -17,7 +17,7 @@ export default class PuzzleGame extends Game {
     this.mode = this.options.mode || 'swap';
     this.art = artUrl(theme);
     this.moves = 0;
-    this.startedAt = 0;
+    this.timer = new Timer(this);
     this.selected = null;
     this.forceNum = !!this.options.num;          // 数字模式：始终显示数字、不显示图片（游戏内可切换）
     this.showNumbers = this.forceNum;
@@ -169,7 +169,7 @@ export default class PuzzleGame extends Game {
 
   tap(t) {
     if (this.done) return;
-    if (!this.startedAt) this.startedAt = performance.now();
+    if (!this.timer.running && !this.timer.paused) this.timer.startCountUp((ms) => this.hud.patch('time', formatTime(ms)));
     if (this.mode === 'slide') {
       if (t.hidden) return;
       const nb = this.neighbors({ r: t.r, c: t.c });
@@ -202,13 +202,6 @@ export default class PuzzleGame extends Game {
   checkWin() {
     const n = this.n;
     return this.tiles.every((t) => t.id === t.r * n + t.c && (this.mode === 'slide' || !t.hidden));
-  }
-
-  start() {
-    this.every(() => {
-      if (!this.startedAt || this.done) return;
-      this.hud.patch('time', formatTime(performance.now() - this.startedAt));
-    }, 250);
   }
 
   peek() {
@@ -245,7 +238,8 @@ export default class PuzzleGame extends Game {
 
   win() {
     this.done = true;
-    const elapsed = this.startedAt ? performance.now() - this.startedAt : 0;
+    this.timer.stop();
+    const elapsed = this.timer.ms || 0;
     const cells = this.n * this.n;
     const par = this.mode === 'slide' ? cells * 3 : cells * 1.2;
     const stars = this.moves <= par ? 3 : this.moves <= par * 1.7 ? 2 : 1;

@@ -18,12 +18,19 @@ export default class ReactionGame extends Game {
     const restart = el('button.btn.btn--sm.btn--ghost', { text: '🔄 重新测', onClick: () => this.ctx.restart() });
     this.root.appendChild(controlRow([lv, restart]));
 
-    this.pad = el('button.rc-pad.fit-box', { onClick: () => this.hit() }, [
+    // 用 pointerdown 而不是 click：手指一碰到就计时，测得更准
+    this.pad = el('button.rc-pad.fit-box', {}, [
       el('div.rc-pad__inner', {}, [
         el('div.rc-pad__title'),
         el('div.rc-pad__sub'),
       ]),
     ]);
+    this.pad.addEventListener('pointerdown', (e) => { e.preventDefault(); this.hit(); });
+    this.on(window, 'keydown', (e) => {
+      if (e.repeat || (e.key !== ' ' && e.key !== 'Enter')) return;
+      e.preventDefault();
+      this.hit();
+    });
     this.root.appendChild(this.pad);
 
     this.list = el('div.rc-list');

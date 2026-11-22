@@ -1,13 +1,14 @@
 {
   "name": "brain-master",
-  "version": "0.9.0",
+  "version": "1.0.0",
   "private": true,
   "description": "Brain Master · 脑力大师 —— 儿童益智游戏合集（Web + Android）",
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "preview": "vite preview",
+    "preview": "npm run build && vite preview",
     "build": "node scripts/build-web.mjs",
+    "icons": "node scripts/gen-icons.mjs",
     "cap:add": "npm run build && cap add android",
     "cap:sync": "npm run build && cap sync android",
     "cap:open": "npm run build && cap sync android && cap open android",
@@ -25,6 +26,7 @@
   },
   "devDependencies": {
     "@capacitor/cli": "^8.0.0",
+    "@resvg/resvg-js": "^2.6.2",
     "esbuild": "^0.28.2",
     "vite": "^8.3.0"
   }

@@ -13,6 +13,7 @@ export default class NumbersGame extends Game {
     this.cleared = 0;
     this.phase = 'idle'; // idle | memorize | input | over
     this.expected = 1;
+    this.lives = 3;
 
     const lv = levelBar(this.meta, this.options.level, (id) => this.ctx.reload({ level: id }));
     const restart = el('button.btn.btn--sm.btn--ghost', { text: '🔄 重新开始', onClick: () => this.ctx.restart() });
@@ -27,6 +28,7 @@ export default class NumbersGame extends Game {
       { key: 'round', label: '关卡', value: '1' },
       { key: 'next', label: '下一个', value: '1' },
       { key: 'cleared', label: '通过', value: '0' },
+      { key: 'lives', label: '生命', value: '❤️❤️❤️' },
     ]);
     this.hud.show();
 
@@ -105,11 +107,22 @@ export default class NumbersGame extends Game {
   }
 
   wrong() {
+    this.lives -= 1;
+    this.hud.patch('lives', '❤️'.repeat(this.lives) + '🤍'.repeat(3 - this.lives), this.lives <= 1);
+    this.cells.forEach((c) => {
+      if (c.dataset.num && !c.classList.contains('is-done')) { c.textContent = c.dataset.num; c.classList.add('is-reveal'); }
+    });
+    if (this.lives > 0) {
+      // 还有生命：看一眼答案，同样数量重来一次
+      this.phase = 'idle';
+      this.sound.play('bad');
+      this.tip.textContent = `点错了，还剩 ${this.lives} 次机会，同样 ${this.n} 个数字再来一次`;
+      this.round -= 1;
+      this.later(() => this.nextRound(), 1600);
+      return;
+    }
     this.phase = 'over';
     this.sound.play('lose');
-    this.cells.forEach((c) => {
-      if (c.dataset.num) { c.textContent = c.dataset.num; c.classList.add('is-reveal'); }
-    });
     const stars = this.cleared >= 8 ? 3 : this.cleared >= 5 ? 2 : this.cleared >= 2 ? 1 : 1;
     this.finish({
       score: this.cleared,

@@ -4,6 +4,7 @@
 import { Game, Timer } from '../../core/Game.js';
 import { el, randInt, pick, shuffle, clamp } from '../../core/utils.js';
 import { levelBar, controlRow } from '../../ui/widgets.js';
+import { floatText } from '../../ui/modal.js';
 
 export default class MathGame extends Game {
   async mount() {
@@ -14,6 +15,7 @@ export default class MathGame extends Game {
     this.wrong = 0;
     this.combo = 0;
     this.bestCombo = 0;
+    this.bonus = 0;
     this.done = false;
     this.timer = new Timer(this);
 
@@ -33,6 +35,10 @@ export default class MathGame extends Game {
     ]);
     this.hud.show();
 
+    this.on(window, 'keydown', (e) => {
+      const k = Number(e.key);
+      if (k >= 1 && k <= 4) this.optNode.children[k - 1]?.click();
+    });
     this.next();
   }
 
@@ -43,11 +49,14 @@ export default class MathGame extends Game {
       a = randInt(1, this.max - 1); b = randInt(1, this.max - a); ans = a + b;
     } else if (op === '-') {
       a = randInt(2, this.max); b = randInt(1, a - 1); ans = a - b;
-    } else {
+    } else if (op === '×') {
       const hi = clamp(Math.round(this.max / 6), 5, 12);
       a = randInt(2, hi); b = randInt(2, 9); ans = a * b;
       // 偶尔交换，避免出现规律
       if (Math.random() < 0.5) [a, b] = [b, a];
+    } else {
+      // 除法：由乘法倒推，保证整除
+      b = randInt(2, 9); ans = randInt(2, 9); a = b * ans;
     }
     return { a, b, op, ans };
   }
@@ -56,12 +65,12 @@ export default class MathGame extends Game {
     if (this.done) return;
     const q = this.makeQuestion();
     this.current = q;
-    const text = `${q.a} ${q.op === '×' ? '×' : q.op} ${q.b} = ?`;
+    const text = `${q.a} ${q.op} ${q.b} = ?`;
     this.qNode.textContent = text;
     this.qNode.classList.remove('pop-in');
     void this.qNode.offsetWidth;
     this.qNode.classList.add('pop-in');
-    this.say(`${q.a} ${q.op === '+' ? '加' : q.op === '-' ? '减' : '乘以'} ${q.b} 等于几`);
+    this.say(`${q.a} ${{ '+': '加', '-': '减', '×': '乘以', '÷': '除以' }[q.op]} ${q.b} 等于几`);
 
     const opts = new Set([q.ans]);
     let guard = 0;
@@ -91,11 +100,11 @@ export default class MathGame extends Game {
       this.sound.play(this.combo >= 5 ? 'great' : 'good');
       this.hud.patch('right', this.correct);
       this.hud.patch('combo', `x${this.combo}`);
-      // 连击奖励：每 5 连 +2 秒
-      if (this.combo % 5 === 0) {
-        this.timer.left = Math.min(this.duration, this.timer.left + 2000);
-        this.timer.endAt = performance.now() + this.timer.left;
-        import('../../ui/modal.js').then((m) => m.toast('连击奖励 +2 秒！'));
+      // 连击奖励：每 5 连 +2 秒（整局最多奖励 20 秒）
+      if (this.combo % 5 === 0 && this.bonus < 20000) {
+        this.bonus += 2000;
+        this.timer.addTime(2000, this.duration);
+        floatText(this.qNode, `连击 +2秒`, 'var(--c-green)');
       }
       this.later(() => this.next(), 160);
     } else {
@@ -107,8 +116,8 @@ export default class MathGame extends Game {
       this.later(() => this.qNode.classList.remove('shake'), 320);
       this.sound.play('bad');
       // 答错扣 2 秒
-      this.timer.left = Math.max(0, this.timer.left - 2000);
-      this.timer.endAt = performance.now() + this.timer.left;
+      this.timer.addTime(-2000);
+      floatText(btn, '-2秒', 'var(--c-red)');
       const rightBtn = Array.from(this.optNode.children).find((b) => Number(b.textContent) === q.ans);
       rightBtn?.classList.add('is-right');
     }

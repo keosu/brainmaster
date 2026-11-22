@@ -33,12 +33,19 @@ export function showModal({ title, sub, emoji, body, actions = [], dismissable =
     parts.push(bar);
   }
   node.append(...parts);
-  const overlay = el('div.overlay', { onClick: (e) => { if (dismissable && e.target === overlay) { closeModal(); onClose?.(); } } }, [node]);
+  const dismiss = () => { closeModal(); onClose?.(); };
+  const overlay = el('div.overlay', { onClick: (e) => { if (dismissable && e.target === overlay) dismiss(); } }, [node]);
+  overlay._dismiss = dismissable ? dismiss : null;
   root().appendChild(overlay);
-  return {
-    node,
-    close: () => { closeModal(); onClose?.(); },
-  };
+  return { node, close: dismiss };
+}
+
+/** 关闭最上层可关闭的弹窗（安卓返回键用），返回是否有弹窗被关掉 */
+export function dismissTop() {
+  const overlay = root().querySelector('.overlay');
+  if (!overlay?._dismiss) return false;
+  overlay._dismiss();
+  return true;
 }
 
 /**
@@ -55,7 +62,9 @@ export function showResult(r) {
     html: Array.from({ length: 3 }, (_, i) => `<span class="${i < stars ? '' : 'off'}">⭐</span>`).join(''),
   });
   const body = el('div', {}, [
-    typeof r.score === 'number' ? el('div.modal__score', { text: String(r.score) }) : null,
+    typeof r.score === 'number'
+      ? el('div.modal__score', {}, [String(r.score), r.unit ? el('small.modal__unit', { text: r.unit }) : null])
+      : null,
     starHtml,
     r.stats?.length
       ? el('div.modal__stats', {}, r.stats.map((s) => el('div.modal__stat', {}, [
@@ -68,7 +77,10 @@ export function showResult(r) {
   ]);
 
   if (r.speak) voice.speak(r.speak);
-  sound.play(stars >= 3 ? 'win' : stars >= 1 ? 'great' : 'lose');
+  if (!r.quiet) {
+    sound.play(stars >= 3 ? 'win' : stars >= 1 ? 'great' : 'lose');
+    if (stars >= 3 || r.newBest) confetti();
+  }
 
   return showModal({
     title: r.title || '挑战完成',
@@ -79,6 +91,64 @@ export function showResult(r) {
     dismissable,
     onClose: r.onClose,
   });
+}
+
+/* ---------------- 彩纸庆祝 ---------------- */
+const CONFETTI_COLORS = ['#6ee7ff', '#5b8cff', '#b46bff', '#ff6b9d', '#ffd166', '#4ade80'];
+
+export function confetti({ count = 110, duration = 2200 } = {}) {
+  if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
+  const canvas = el('canvas.confetti');
+  document.body.appendChild(canvas);
+  const ctx = canvas.getContext('2d');
+  const dpr = Math.min(2, window.devicePixelRatio || 1);
+  const W = window.innerWidth;
+  const H = window.innerHeight;
+  canvas.width = W * dpr;
+  canvas.height = H * dpr;
+  ctx.scale(dpr, dpr);
+  const parts = Array.from({ length: count }, () => ({
+    x: W / 2 + (Math.random() - 0.5) * W * 0.3,
+    y: H * 0.38,
+    vx: (Math.random() - 0.5) * 13,
+    vy: -6 - Math.random() * 9,
+    w: 6 + Math.random() * 6,
+    h: 8 + Math.random() * 8,
+    rot: Math.random() * Math.PI,
+    vr: (Math.random() - 0.5) * 0.3,
+    color: CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)],
+  }));
+  const t0 = performance.now();
+  const step = (now) => {
+    const t = now - t0;
+    ctx.clearRect(0, 0, W, H);
+    ctx.globalAlpha = Math.max(0, 1 - Math.max(0, t - duration * 0.6) / (duration * 0.4));
+    parts.forEach((p) => {
+      p.vy += 0.32; p.vx *= 0.99;
+      p.x += p.vx; p.y += p.vy; p.rot += p.vr;
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rot);
+      ctx.fillStyle = p.color;
+      ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h * Math.abs(Math.cos(p.rot * 2)));
+      ctx.restore();
+    });
+    if (t < duration) requestAnimationFrame(step);
+    else canvas.remove();
+  };
+  requestAnimationFrame(step);
+}
+
+/** 在指定元素上方飘出一段文字（如 +10、+2 秒） */
+export function floatText(anchor, text, color = 'var(--c-amber)') {
+  if (!anchor?.getBoundingClientRect) return;
+  const r = anchor.getBoundingClientRect();
+  const node = el('div.float-text', {
+    text,
+    style: { left: `${r.left + r.width / 2}px`, top: `${r.top + r.height * 0.3}px`, color },
+  });
+  document.body.appendChild(node);
+  setTimeout(() => node.remove(), 900);
 }
 
 /* ---------------- Toast ---------------- */

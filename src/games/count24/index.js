@@ -6,7 +6,7 @@ import { Game, Timer } from '../../core/Game.js';
 import { el } from '../../core/utils.js';
 import { levelBar, controlRow } from '../../ui/widgets.js';
 import { toast } from '../../ui/modal.js';
-import { dealCards } from './solvers.js';
+import { dealCards, solution } from './solvers.js';
 
 const OPS = [
   { id: '+', label: '＋', fn: (a, b) => a + b },
@@ -23,6 +23,7 @@ export default class Count24Game extends Game {
     this.history = [];
     this.steps = 0;
     this.undos = 0;
+    this.hints = 0;
     this.sel = [];        // 选中的牌下标
     this.done = false;
     this.target = Number(this.options.target || 24);
@@ -30,8 +31,9 @@ export default class Count24Game extends Game {
 
     const lv = levelBar(this.meta, this.options.level, (id) => this.ctx.reload({ level: id }));
     const undoBtn = el('button.btn.btn--sm.btn--ghost', { text: '↩️ 撤销', onClick: () => this.undo() });
+    const hintBtn = el('button.btn.btn--sm.btn--ghost', { text: '💡 提示', onClick: () => this.hint() });
     const restartBtn = el('button.btn.btn--sm.btn--ghost', { text: '🔄 换一题', onClick: () => this.ctx.restart() });
-    this.root.appendChild(controlRow([lv, undoBtn, restartBtn]));
+    this.root.appendChild(controlRow([lv, undoBtn, hintBtn, restartBtn]));
 
     this.targetRow = el('div.c24-target', {}, [
       el('span.c24-target__k', { text: '目标' }),
@@ -132,6 +134,26 @@ export default class Count24Game extends Game {
     }
   }
 
+  /** 提示：从当前牌面出发找一条解，把第一步要合并的两张牌选中；当前牌面无解则先撤销 */
+  hint() {
+    if (this.done) return;
+    let steps = solution(this.cards, this.target);
+    while (!steps && this.history.length) {
+      this.undo();
+      steps = solution(this.cards, this.target);
+    }
+    if (!steps || !steps.length) return;
+    const s = steps[0];
+    this.hints += 1;
+    this.sel = [s.i, s.j];
+    this.render();
+    this.tip.textContent = `💡 试试：${s.a} ${s.op} ${s.b} = ${s.v}`;
+    const btn = Array.from(this.opRow.children).find((b) => OPS.find((o) => o.label === b.textContent)?.id === s.op);
+    btn?.classList.add('is-hint');
+    this.later(() => btn?.classList.remove('is-hint'), 1600);
+    this.sound.play('flip');
+  }
+
   undo() {
     if (this.done || !this.history.length) return;
     const prev = this.history.pop();
@@ -149,7 +171,8 @@ export default class Count24Game extends Game {
     this.done = true;
     this.timer.stop();
     const sec = (this.timer.ms || 0) / 1000;
-    const stars = sec <= 25 ? 3 : sec <= 60 ? 2 : 1;
+    let stars = sec <= 25 ? 3 : sec <= 60 ? 2 : 1;
+    if (this.hints) stars = Math.max(1, stars - 1);
     const exprText = `${this.exprs[0].replace(/^\((.*)\)$/, '$1')} = ${this.target}`;
     this.tip.textContent = `${exprText} · 用时 ${sec.toFixed(1)} 秒`;
     this.sound.play('win');
@@ -163,7 +186,7 @@ export default class Count24Game extends Game {
       stats: [
         { label: '算式', value: exprText },
         { label: '合并次数', value: this.steps },
-        { label: '撤销次数', value: this.undos },
+        { label: '提示次数', value: this.hints },
       ],
     });
   }

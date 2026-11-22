@@ -1,10 +1,12 @@
-/* Brain Master · 布局：外壳 / 首页 / 游戏页 */
+/* Brain Master · 布局：外壳 / 首页 / 游戏页（竖屏 + 横屏） */
 .shell {
   height: 100vh;
   height: 100dvh;
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  padding-left: var(--safe-l);
+  padding-right: var(--safe-r);
 }
 
 /* 内容区：整体高度受控，首页在这里内部滚动 */
@@ -27,35 +29,47 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: calc(12px + var(--safe-t)) 18px 12px;
+  padding: calc(10px + var(--safe-t)) 16px 10px;
   backdrop-filter: blur(14px);
   background: linear-gradient(180deg, rgba(9, 13, 30, 0.92), rgba(9, 13, 30, 0.55));
   border-bottom: 1px solid var(--border);
 }
 .topbar__back {
-  display: inline-flex; align-items: center; gap: 6px;
-  padding: 8px 14px 8px 10px;
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 6px 14px 6px 10px;
   border-radius: 99px;
   background: var(--panel);
   border: 1px solid var(--border);
   font-size: 14px;
+  flex: none;
   transition: transform .15s, background .15s;
 }
+.topbar__back-ico { font-size: 24px; line-height: 1; margin-top: -3px; font-weight: 300; }
 .topbar__back:hover { background: var(--panel-2); transform: translateX(-2px); }
 
 /* 标题区：名称与类别同一行（类别以分隔点收尾），放不下时省略号 */
 .topbar__titlebox { display: flex; align-items: baseline; gap: 8px; min-width: 0; }
-.topbar__title { font-size: 17px; font-weight: 700; letter-spacing: .5px; white-space: nowrap; }
+.topbar__title { font-size: 17px; font-weight: 700; letter-spacing: .5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .topbar__sub {
   font-size: 12px; color: var(--ink-3); white-space: nowrap;
   overflow: hidden; text-overflow: ellipsis; min-width: 0;
 }
 .topbar__sub:not(:empty)::before { content: '·'; margin-right: 8px; color: var(--ink-3); }
 
-/* 首页品牌区：logo + 名称 + 轻量 slogan，整体一行 */
+/* 首页品牌区：logo + 名称 + 轻量 slogan */
 .topbar__brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.topbar__logo {
+  width: 40px; height: 40px; flex: none;
+  border-radius: 12px;
+  box-shadow: 0 6px 16px rgba(91, 140, 255, .35);
+}
+.topbar__brandtext { display: flex; flex-direction: column; min-width: 0; line-height: 1.2; }
+.topbar__title--brand {
+  font-size: 18px; font-weight: 900; letter-spacing: 2px;
+  background: var(--grad-hero); -webkit-background-clip: text; background-clip: text; color: transparent;
+}
 .topbar__slogan {
-  font-size: 12px; color: var(--ink-3); white-space: nowrap;
+  font-size: 11px; color: var(--ink-3); white-space: nowrap;
   overflow: hidden; text-overflow: ellipsis;
 }
 .topbar__spacer { flex: 1; }
@@ -73,23 +87,24 @@
 .icon-btn:hover { background: var(--panel-2); }
 .icon-btn:active { transform: scale(0.92); }
 .icon-btn.is-off { opacity: .45; }
+.icon-btn.is-on { border-color: var(--c-cyan); color: var(--c-cyan); }
 
 /* ---------- 首页 ---------- */
 .home {
-  width: min(1180px, 100%);
+  width: min(1240px, 100%);
   margin: 0 auto;
-  padding: 14px 16px 48px;
+  padding: 14px 16px calc(40px + var(--safe-b));
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 14px;
 }
 
-/* Hero：一行轻量状态条（品牌 + 关键数据），细节信息收进进度条/悬浮提示 */
+/* Hero：一行轻量状态条（关键数据 + 每日训练） */
 .hero {
   position: relative;
   overflow: hidden;
   border-radius: var(--r-lg);
-  padding: 10px 16px 12px;
+  padding: 10px 16px 10px;
   background: linear-gradient(135deg, rgba(110, 231, 255, 0.12), rgba(180, 107, 255, 0.12));
   border: 1px solid var(--border);
   box-shadow: var(--shadow-2);
@@ -102,7 +117,6 @@
   background: radial-gradient(circle, rgba(110, 231, 255, 0.3), transparent 65%);
   pointer-events: none;
 }
-/* 纯数据条：所有 chip 强制同一行，不换行 */
 .hero__row {
   position: relative; z-index: 1;
   display: flex; align-items: center; flex-wrap: nowrap;
@@ -117,29 +131,53 @@
   white-space: nowrap;
 }
 .hero__stat b { color: #fff; font-size: 13px; font-weight: 800; }
-
-/* 每日训练按钮：固定在数据行最右侧 */
 .hero__daily {
   flex: none;
   margin-left: auto;
-  padding: 4px 12px;
+  padding: 5px 14px;
   font-size: 12.5px;
   white-space: nowrap;
 }
+.hero__tip { position: relative; z-index: 1; margin-top: 6px; font-size: 11px; color: var(--ink-3); }
 
 .levelbar { position: relative; z-index: 1; margin-top: 9px; height: 4px; border-radius: 99px; background: rgba(132, 166, 255, .16); overflow: hidden; }
 .levelbar__fill { height: 100%; border-radius: 99px; background: var(--grad-hero); transition: width .6s cubic-bezier(.22,1,.36,1); }
 
+/* 最近玩过：横向滑动的一行 */
+.recent { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.recent__k { flex: none; font-size: 12px; color: var(--ink-3); }
+.recent__list { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; padding: 2px; }
+.recent__list::-webkit-scrollbar { display: none; }
+.recent__item {
+  position: relative; isolation: isolate; overflow: hidden;
+  flex: none; display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 12px 6px 6px; border-radius: 99px;
+  font-size: 12.5px; white-space: nowrap;
+  background: var(--panel); border: 1px solid var(--border);
+}
+.recent__item::before { content: ""; position: absolute; inset: 0; z-index: -1; background: var(--glow); opacity: .18; }
+.recent__ico {
+  width: 24px; height: 24px; display: grid; place-items: center;
+  border-radius: 50%; background: var(--glow); font-size: 13px;
+}
+
 /* 分区标题 */
-.section__head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 14px; }
+.section__head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 12px; }
 .section__title { font-size: 18px; font-weight: 800; }
 .section__hint { font-size: 12px; color: var(--ink-3); }
+
+/* 分类筛选 */
+.cats { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; }
+.cats::-webkit-scrollbar { display: none; }
+.cats__chip { flex: none; padding: 7px 13px; gap: 5px; }
+.cats__chip small { font-size: 10.5px; color: var(--ink-3); font-weight: 700; }
+.cats__chip.is-on small { color: var(--c-cyan); }
 
 /* 游戏网格 */
 .grid-games {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
-  gap: 16px;
+  gap: 14px;
 }
 
 /* 主题选择行 */
@@ -158,10 +196,12 @@
   flex-direction: column;
   width: min(1080px, 100%);
   margin: 0 auto;
-  padding: 14px 16px calc(28px + var(--safe-b));
-  gap: 14px;
+  padding: 12px 16px calc(16px + var(--safe-b));
+  gap: 12px;
 }
-.stage__hud, .stage__train { flex: none; }
+.stage__train:empty, .stage__slot:empty { display: none; }
+.stage__train, .stage__side { flex: none; }
+.stage__side, .stage__slot { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
 .stage__body {
   flex: 1;
   min-height: 0;
@@ -177,8 +217,37 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 14px;
+  gap: 12px;
 }
+
+/* 横屏：左侧栏（HUD + 控件 + 提示），右侧整块给棋盘 */
+.stage.is-land {
+  display: grid;
+  width: min(1440px, 100%);
+  grid-template-columns: clamp(200px, 27%, 320px) minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+  column-gap: 18px;
+  row-gap: 10px;
+}
+.stage.is-land.has-train { grid-template-rows: auto minmax(0, 1fr); }
+.stage.is-land .stage__train { grid-column: 1 / -1; grid-row: 1; }
+.stage.is-land .stage__side { grid-column: 1; grid-row: -2 / -1; min-height: 0; overflow-y: auto; overflow-x: hidden; padding: 2px; }
+.stage.is-land .stage__body { grid-column: 2; grid-row: -2 / -1; }
+.stage.is-land .stage__hud { margin-top: auto; }
+.stage.is-land .stage__slot { margin-bottom: auto; align-items: stretch; }
+.stage.is-land .hud {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(78px, 1fr));
+  gap: 8px 4px;
+  padding: 10px 8px;
+}
+.stage.is-land .hud__sep { display: none; }
+.stage.is-land .hud__slot { min-width: 0; }
+.stage.is-land .stage__slot .seg { flex-wrap: wrap; justify-content: center; border-radius: 18px; max-width: 100%; }
+.stage.is-land .stage__slot .pill { justify-content: center; text-align: center; line-height: 1.5; border-radius: 14px; }
+.stage.is-land .stage__slot .ctrl-group--theme .themes { display: none; }
+.stage.is-land .stage__slot .theme-select { display: inline-block; max-width: 100%; }
+.stage.is-land .stage__slot .ctl-label { display: inline; }
 
 /* 训练进度条 */
 .trainbar { display: flex; gap: 8px; align-items: center; justify-content: center; flex-wrap: wrap; }
@@ -192,11 +261,12 @@
 .trainbar__chip.is-now { color: #06121f; background: var(--grad-hero); border-color: transparent; font-weight: 700; }
 
 @media (max-width: 640px) {
-  .home { padding: 10px 10px 40px; gap: 10px; }
-  .hero { padding: 7px 10px 9px; border-radius: var(--r-lg); }
-  .grid-games { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+  .home { padding: 10px 10px calc(36px + var(--safe-b)); gap: 12px; }
+  .hero { padding: 8px 10px 8px; border-radius: var(--r-lg); }
+  .hero__tip { display: none; }
+  .grid-games { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
   .topbar { padding: calc(8px + var(--safe-t)) 10px 8px; gap: 6px; }
-  /* 右侧图标按钮：去掉圆角底色与边框，缩小一档，保证三个都完整显示 */
+  /* 右侧图标按钮：去掉圆角底色与边框，缩小一档 */
   .topbar__actions { gap: 2px; }
   .icon-btn {
     width: 34px; height: 34px;
@@ -206,11 +276,12 @@
     font-size: 17px;
   }
   .icon-btn:active { background: rgba(255, 255, 255, .08); }
-  .stage { padding: 12px 10px calc(24px + var(--safe-b)); }
+  .stage { padding: 10px 10px calc(14px + var(--safe-b)); gap: 10px; }
 
-  /* 手机顶栏：首页只留 🧠 logo（名称与 slogan 收起）；Hero 数据 chip 紧凑化 */
-  .topbar__title--brand, .topbar__slogan { display: none; }
-  .topbar__back-label { display: none; }       /* 返回键只留 🏠 图标 */
+  .topbar__slogan { display: none; }
+  .topbar__logo { width: 34px; height: 34px; border-radius: 10px; }
+  .topbar__back-label { display: none; }       /* 返回键只留箭头 */
+  .topbar__back { padding: 4px 12px 4px 10px; }
   .topbar__title { font-size: 15px; }
 
   .hero__row { gap: 4px; }
@@ -218,14 +289,37 @@
   .hero__stat b { font-size: 12px; }
   .hero__daily { padding: 4px 10px; font-size: 12px; }
   .gcard__desc { display: none; }
-  .gcard__cat { display: none; }
-  .gcard { padding: 14px; gap: 8px; }
+  .gcard { padding: 12px; gap: 8px; }
   .gcard__icon { width: 42px; height: 42px; font-size: 22px; }
   .gcard__name { font-size: 15px; }
+  .gcard__cat { font-size: 10.5px; }
   .gcard__foot { font-size: 11px; }
+  .gcard__tags .tag:nth-child(2) { display: none; }
 }
 
 @media (max-width: 420px) {
-  /* 超窄屏：收起“累计挑战”，给右侧训练按钮留位 */
+  /* 超窄屏：收起"累计挑战"，给右侧训练按钮留位 */
   .hero__stat:nth-child(4) { display: none; }
+}
+
+/* 横屏手机等矮屏幕：顶栏、HUD 全部压扁，把高度留给棋盘 */
+@media (max-height: 520px) {
+  .topbar { padding: calc(4px + var(--safe-t)) 12px 4px; }
+  .topbar__logo { width: 30px; height: 30px; }
+  .topbar__slogan { display: none; }
+  .icon-btn { width: 32px; height: 32px; font-size: 15px; }
+  .stage { padding: 6px 12px calc(6px + var(--safe-b)); gap: 8px; }
+  .stage.is-land { column-gap: 12px; grid-template-columns: clamp(180px, 30%, 280px) minmax(0, 1fr); }
+  .hud { min-height: 0; padding: 6px 8px; }
+  .hud__v { font-size: 16px; }
+  .hud__k { font-size: 10px; }
+  .stage__slot .pill { font-size: 11.5px; padding: 5px 10px; }
+  .stage.is-land .stage__slot .controls { gap: 6px !important; }
+  .seg__item { padding: 5px 11px; font-size: 12px; }
+  .btn--sm { padding: 6px 12px; font-size: 12.5px; }
+  .home { padding-top: 8px; }
+  .grid-games { grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 10px; }
+  .gcard { padding: 12px; gap: 8px; }
+  .gcard__desc { display: none; }
+  .gcard__tags .tag:nth-child(2) { display: none; }
 }

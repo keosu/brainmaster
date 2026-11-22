@@ -44,6 +44,10 @@ export default class StroopGame extends Game {
     this.hud.show();
 
     this.buildButtons();
+    this.on(window, 'keydown', (e) => {
+      const k = Number(e.key);
+      if (k >= 1 && k <= this.pool.length) this.btnNode.children[k - 1]?.click();
+    });
     this.next();
   }
 
@@ -91,8 +95,7 @@ export default class StroopGame extends Game {
       this.sound.play('bad');
       this.wordNode.classList.add('shake');
       this.later(() => this.wordNode.classList.remove('shake'), 320);
-      this.timer.left = Math.max(0, this.timer.left - 1500);
-      this.timer.endAt = performance.now() + this.timer.left;
+      this.timer.addTime(-1500);
     }
     this.hud.patch('score', this.score);
     this.hud.patch('combo', `x${this.combo}`);

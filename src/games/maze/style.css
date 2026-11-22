@@ -1,0 +1,65 @@
+.mz-board {
+  position: relative;
+  width: min(96vw, var(--fit-w, 92vw), var(--fit-h, 92vw), 680px);
+  aspect-ratio: 1;
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at 50% 40%, rgba(110, 231, 255, .08), transparent 62%),
+    linear-gradient(160deg, #16283f, #0c1a2c);
+  border: 1px solid rgba(154, 192, 255, .25);
+  box-shadow: inset 0 0 28px rgba(0, 0, 0, .5), 0 16px 40px rgba(0, 0, 0, .42);
+  touch-action: none;
+  --pad: calc(100% * 0.2 / (var(--n) + 0.4));
+  --cell: calc(100% / (var(--n) + 0.4));
+}
+.mz-svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.mz-trail { transition: all .05s; }
+
+.mz-sprite {
+  position: absolute;
+  width: var(--cell);
+  height: var(--cell);
+  left: calc(var(--pad) + var(--c) * var(--cell));
+  top: calc(var(--pad) + var(--r) * var(--cell));
+  display: grid;
+  place-items: center;
+  font-size: calc(min(96vw, var(--fit-w, 92vw), var(--fit-h, 92vw), 680px) / (var(--n) + 0.4) * .74);
+  line-height: 1;
+  pointer-events: none;
+}
+.mz-hero {
+  transition: left .055s linear, top .055s linear;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, .5));
+  z-index: 2;
+}
+.mz-hero.is-bump { animation: mzBump .2s; }
+.mz-hero.is-win { animation: mzWin .5s ease 2; }
+.mz-goal { animation: mzGoal 1.2s ease-in-out infinite; }
+.mz-goal.is-eaten { animation: none; opacity: 0; transition: opacity .3s; }
+@keyframes mzBump { 25% { transform: translateX(-8%); } 75% { transform: translateX(8%); } }
+@keyframes mzWin { 50% { transform: scale(1.5) rotate(10deg); } }
+@keyframes mzGoal { 50% { transform: scale(1.15); } }
+
+/* 方向按钮：触屏设备才显示 */
+.mz-pad {
+  display: none;
+  grid-template-areas: ". up ." "left . right" ". down .";
+  grid-template-columns: repeat(3, 52px);
+  grid-template-rows: repeat(3, 44px);
+  gap: 4px;
+}
+.is-touch .mz-pad { display: grid; }
+.mz-key {
+  border-radius: 14px;
+  font-size: 18px;
+  color: var(--ink);
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, .3);
+}
+.mz-key:active { transform: scale(.92); background: rgba(110, 231, 255, .25); }
+.mz-key--up { grid-area: up; }
+.mz-key--down { grid-area: down; }
+.mz-key--left { grid-area: left; }
+.mz-key--right { grid-area: right; }
+.stage.is-land .mz-pad { align-self: center; grid-template-columns: repeat(3, 60px); grid-template-rows: repeat(3, 52px); }

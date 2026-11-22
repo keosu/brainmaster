@@ -1,7 +1,7 @@
 /**
  * 数独小格 —— 4×4 / 6×6 / 9×9，程序生成保证唯一解
  */
-import { Game } from '../../core/Game.js';
+import { Game, Timer } from '../../core/Game.js';
 import { el, shuffle, formatTime, randInt } from '../../core/utils.js';
 import { levelBar, controlRow } from '../../ui/widgets.js';
 
@@ -105,9 +105,11 @@ export default class SudokuGame extends Game {
     this.values = puzzle.slice();
     this.solution = solution;
     this.selected = -1;
-    this.startedAt = 0;
     this.done = false;
     this.mistakes = 0;
+    this.hints = 0;
+    this.peerSet = this.peers.map((p) => new Set(p));
+    this.timer = new Timer(this);
 
     const lv = levelBar(this.meta, this.options.level, (id) => this.ctx.reload({ level: id }));
     const hintBtn = el('button.btn.btn--sm.btn--ghost', { text: '💡 提示一个', onClick: () => this.hint() });
@@ -150,11 +152,7 @@ export default class SudokuGame extends Game {
   }
 
   start() {
-    this.startedAt = performance.now();
-    this.every(() => {
-      if (this.done) return;
-      this.hud.patch('time', formatTime(performance.now() - this.startedAt));
-    }, 250);
+    this.timer.startCountUp((ms) => this.hud.patch('time', formatTime(ms)));
   }
 
   select(i) {
@@ -190,7 +188,7 @@ export default class SudokuGame extends Game {
     const i = empties[randInt(0, empties.length - 1)];
     this.values[i] = this.solution[i];
     this.given[i] = true;
-    this.score = this.score || 0;
+    this.hints += 1;
     this.sound.play('flip');
     this.render();
     if (this.values.every((x) => x) && this.values.every((x, k) => x === this.solution[k])) this.win();
@@ -205,19 +203,28 @@ export default class SudokuGame extends Game {
       const bad = v && this.peers[i].some((p) => this.values[p] === v && p !== i);
       cell.classList.toggle('is-bad', !!bad);
       cell.classList.toggle('is-same', !!v && this.selected >= 0 && this.values[this.selected] === v && i !== this.selected);
+      cell.classList.toggle('is-peer', this.selected >= 0 && this.peerSet[this.selected].has(i));
       // 宫格分隔线
       const r = Math.floor(i / this.size), c = i % this.size;
       cell.classList.toggle('br', (c + 1) % this.shape.boxC === 0 && c !== this.size - 1);
       cell.classList.toggle('bb', (r + 1) % this.shape.boxR === 0 && r !== this.size - 1);
     });
     this.hud.patch('left', this.values.filter((v) => !v).length);
+    // 某个数字已经正确填满 n 个时，数字键变暗
+    this.padButtons.forEach((b, k) => {
+      const v = k + 1;
+      const full = this.values.filter((x, idx) => x === v && x === this.solution[idx]).length === this.size;
+      b.classList.toggle('is-full', full);
+    });
   }
 
   win() {
     this.done = true;
-    const sec = Math.round((performance.now() - this.startedAt) / 1000);
+    this.timer.stop();
+    const sec = Math.max(1, Math.round((this.timer.ms || 0) / 1000));
     const par = { easy: 60, normal: 180, hard: 480 }[this.options.level] || 120;
-    const stars = sec <= par ? 3 : sec <= par * 1.8 ? 2 : 1;
+    let stars = sec <= par ? 3 : sec <= par * 1.8 ? 2 : 1;
+    if (this.hints >= 3) stars = Math.max(1, stars - 1);
     this.finish({
       score: sec,
       mode: 'min',
@@ -229,7 +236,7 @@ export default class SudokuGame extends Game {
       stats: [
         { label: '用时', value: formatTime(sec * 1000) },
         { label: '误填', value: this.mistakes },
-        { label: '规格', value: `${this.size}×${this.size}` },
+        { label: '提示', value: this.hints },
       ],
     });
   }

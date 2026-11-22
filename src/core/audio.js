@@ -9,6 +9,8 @@
  * 静态 import。这样纯浏览器开发（python serve.py + src 直读）不会触发裸模块
  * 说明符解析失败；打包时 esbuild 再把插件内联进 app.js。
  */
+import { haptic } from './platform.js';
+
 const TONES = {
   tap: [{ f: 520, d: 0.06, type: 'triangle', g: 0.16 }],
   flip: [{ f: 660, d: 0.09, type: 'sine', g: 0.2 }, { f: 880, d: 0.08, type: 'sine', g: 0.14, t: 0.05 }],
@@ -20,6 +22,10 @@ const TONES = {
   win: [{ f: 523, d: 0.12, type: 'triangle', g: 0.2 }, { f: 659, d: 0.12, type: 'triangle', g: 0.2, t: 0.12 }, { f: 784, d: 0.12, type: 'triangle', g: 0.2, t: 0.24 }, { f: 1046, d: 0.3, type: 'triangle', g: 0.22, t: 0.36 }],
   lose: [{ f: 392, d: 0.16, type: 'sine', g: 0.16 }, { f: 311, d: 0.2, type: 'sine', g: 0.16, t: 0.15 }, { f: 233, d: 0.34, type: 'sine', g: 0.16, t: 0.32 }],
   go: [{ f: 880, d: 0.14, type: 'square', g: 0.12 }],
+  pop: [{ f: 980, d: 0.05, type: 'square', g: 0.12 }, { f: 1560, d: 0.08, type: 'sine', g: 0.14, t: 0.03 }],
+  whack: [{ f: 180, d: 0.08, type: 'square', g: 0.16 }, { f: 760, d: 0.08, type: 'triangle', g: 0.14, t: 0.04 }],
+  slide: [{ f: 420, d: 0.05, type: 'triangle', g: 0.1 }, { f: 520, d: 0.05, type: 'triangle', g: 0.08, t: 0.03 }],
+  merge: [{ f: 740, d: 0.07, type: 'sine', g: 0.16 }, { f: 1110, d: 0.1, type: 'sine', g: 0.12, t: 0.05 }],
 };
 
 /** 是否运行在原生壳（安卓/iOS）里：原生运行时会在 window 上挂 Capacitor。 */
@@ -59,6 +65,7 @@ class Sound {
 
   /** 播放预置音效 */
   play(name) {
+    haptic(name);
     if (!this.enabled) return;
     const seq = TONES[name] || TONES.tap;
     const ac = this._ac();
