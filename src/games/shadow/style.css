@@ -1,0 +1,94 @@
+.sh-stage {
+  width: min(96vw, var(--fit-w, 92vw), 920px);
+  height: var(--fit-h, 62vh);
+  max-height: 820px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(8px, 1.8vh, 16px);
+  --opt: clamp(76px, min(calc(var(--fit-w, 92vw) / 3.5), calc(var(--fit-h, 62vh) / 5)), 150px);
+}
+.sh-stage.is-4 { --opt: clamp(70px, min(calc(var(--fit-w, 92vw) / 2.7), calc(var(--fit-h, 62vh) / 5.3)), 140px); }
+.stage.is-land .sh-stage { flex-direction: row; align-items: stretch; }
+.stage.is-land .sh-stage,
+.stage.is-land .sh-stage.is-4 { --opt: clamp(64px, min(calc(var(--fit-w, 92vw) / 6.4), calc(var(--fit-h, 62vh) / 2.9)), 140px); }
+
+.sh-view {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at 50% 40%, rgba(255, 233, 163, .08), transparent 62%),
+    linear-gradient(160deg, #16283f, #0c1a2c);
+  border: 1px solid rgba(154, 192, 255, .22);
+  box-shadow: inset 0 0 28px rgba(0, 0, 0, .5), 0 16px 38px rgba(0, 0, 0, .42);
+}
+.sh-view svg {
+  position: absolute;
+  inset: clamp(8px, 2.4vmin, 22px);
+  width: calc(100% - 2 * clamp(8px, 2.4vmin, 22px));
+  height: calc(100% - 2 * clamp(8px, 2.4vmin, 22px));
+}
+
+.sh-side {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(6px, 1.4vh, 12px);
+}
+.stage.is-land .sh-side { max-width: 46%; }
+
+.sh-ask {
+  max-width: 34em;
+  padding: 6px 14px;
+  border-radius: 14px;
+  text-align: center;
+  font-size: clamp(13px, 2.2vmin, 16px);
+  font-weight: 700;
+  line-height: 1.45;
+  background: rgba(255, 209, 102, .12);
+  border: 1px solid rgba(255, 209, 102, .35);
+}
+.sh-ask.is-not { background: rgba(255, 107, 157, .12); border-color: rgba(255, 107, 157, .4); }
+.sh-ask b { color: #ffd166; }
+.sh-ask.is-not b { color: #ff9fc0; }
+
+.sh-opts {
+  display: grid;
+  grid-template-columns: repeat(var(--n, 3), auto);
+  gap: clamp(6px, 1.6vmin, 14px);
+}
+.sh-stage.is-4 .sh-opts { grid-template-columns: repeat(2, auto); }
+.sh-opt {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: clamp(6px, 1.2vmin, 10px);
+  border-radius: 18px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, .12), rgba(255, 255, 255, .04));
+  border: 1px solid rgba(154, 192, 255, .3);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, .3);
+  transition: transform .12s, background .15s, box-shadow .15s;
+}
+.sh-opt:hover { transform: translateY(-3px); background: rgba(255, 255, 255, .14); }
+.sh-opt:active { transform: scale(.95); }
+.sh-opt.is-right { background: rgba(74, 222, 128, .28); border-color: var(--c-green); box-shadow: 0 0 22px rgba(74, 222, 128, .5); }
+.sh-opt.is-wrong { background: rgba(255, 93, 93, .28); border-color: var(--c-red); animation: shake .32s; }
+.sh-opt__img { width: var(--opt); height: calc(var(--opt) * .78); }
+.sh-opt__img svg { width: 100%; height: 100%; display: block; }
+.sh-opt__k { font-size: 11px; color: var(--muted, #9fb0d8); white-space: nowrap; }
+
+/* 墙与地面：浅色底 + 格线，影子格是深色 */
+.sh-base { fill: rgba(170, 196, 255, .1); stroke: rgba(170, 196, 255, .45); stroke-width: .05; stroke-linejoin: round; }
+.sh-cell { fill: none; stroke: rgba(170, 196, 255, .22); stroke-width: .025; }
+.sh-dark { fill: #070b18; fill-opacity: .88; stroke: rgba(170, 196, 255, .3); stroke-width: .025; }
+.sh-opt .sh-base { fill: #cdd8f4; stroke: #e9efff; stroke-width: .06; }
+.sh-opt .sh-cell { stroke: rgba(40, 56, 100, .28); stroke-width: .03; }
+.sh-opt .sh-dark { fill: #121829; fill-opacity: 1; stroke: rgba(205, 216, 244, .25); }
+.sh-target { fill: rgba(255, 209, 102, .1); stroke: #ffd166; stroke-width: .07; stroke-dasharray: .22 .14; stroke-linejoin: round; }
+.sh-q-mark { font-size: .95px; font-weight: 900; fill: #ffd166; paint-order: stroke; stroke: rgba(0, 0, 0, .55); stroke-width: .12; }
